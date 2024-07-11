@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nadia - AI Image Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@700&family=Raleway:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+    <style>
+        /* Resetting default margins and paddings */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @keyframes gradientAnimation {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(120deg, #90e9e4, #664566, #818dcf, #9ec49e);
+    background-size: 200% 200%;
+    animation: gradientAnimation 7s ease infinite;
+    color: #FFFFFF;
+    overflow-x: hidden;
+    line-height: 1.6;
+}
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            transition: background 0.3s;
+        }
+
+        .logo {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.5em;
+            color: #FFFFFF;
+        }
+
+        .logo::before, .logo::after {
+            content: "<";
+            color: #FFFFFF;
+        }
+
+        .logo::after {
+            content: ">";
+        }
+
+        nav ul {
+            display: flex;
+            gap: 20px;
+        }
+
+        nav ul li {
+            list-style: none;
+        }
+
+        nav ul li a {
+            text-decoration: none;
+            color: #FFFFFF;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        nav ul li a:hover {
+            color: #E1AFD1;
+        }
+        
+
+        .hero {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            overflow: hidden;
+            padding: 0 20px;
+        }
+
+        .hero-text {
+            max-width: 50%;
+            z-index: 1;
+            text-shadow: 0 0 10px #EEA5A6;
+        }
+
+        .hero-text h1 {
+            font-size: 3em;
+            font-family: 'Montserrat', sans-serif;
+            color: #FFFFFF;
+            margin-bottom: 10px;
+        }
+
+        .hero-text h1 span {
+            color: #E1AFD1;
+        }
+
+        .hero-text .button {
+            display: inline-block;
+            padding: 15px 30px;
+            color: #FFFFFF;
+            background-color: #7469B6;
+            border-radius: 5px;
+            border: 2px solid #7469B6;
+            font-weight: bold;
+            text-decoration: none;
+            transition: background-color 0.3s, color 0.3s;
+            margin-top: 20px;
+        }
+
+        .hero-text .button:hover {
+            background-color: #E1AFD1;
+            color: #000000;
+        }
+
+        .hero-image {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 50%;
+            height: 100%;
+            background: url('/mnt/data/image.png') no-repeat center center/cover;
+            z-index: 0;
+        }
+
+        .section {
+            padding: 50px;
+            background: #333;
+            margin: 50px 20px;
+            border-radius: 20px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+        }
+        .section.gallery {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: auto;
+            overflow: hidden;
+        }
+
+        .gallery-slideshow {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+        }
+
+        .gallery-item {
+            min-width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: auto;
+        }
+
+        .gallery-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .gallery-nav-left {
+            left: 0;
+        }
+
+        .gallery-nav-right {
+            right: 0;
+        }
+
+        
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            background: #333;
+        }
+
+        .sticky-nav {
+            position: sticky;
+            top: 80px;
+            background: #000000;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            margin: 20px auto;
+            width: 80%;
+            z-index: 100;
+        }
+
+        .sticky-nav ul {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            padding: 10px;
+            margin: 0;
+        }
+
+        .sticky-nav ul li {
+            margin: 0 15px;
+        }
+
+        .sticky-nav ul li a {
+            text-decoration: none;
+            color: #FFFFFF;
+            font-size: 1.2em;
+            transition: color 0.3s;
+            cursor: pointer;
+        }
+
+        .sticky-nav ul li a:hover {
+            color: #E1AFD1;
+        }
+
+        .sticky-nav ul li a i {
+            margin-right: 5px;
+        }
+
+        .about {
+            text-align: center;
+            font-family: 'Montserrat', sans-serif;
+            max-width: 800px;
+            margin: auto;
+            padding: 0 20px;
+            line-height: 1.8;
+            color: #FFFFFF;
+        }
+
+        .about h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #FFFFFF;
+        }
+
+        .about p {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+
+        /* Mobile Styles */
+        @media screen and (max-width: 768px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 10px;
+            }
+
+            nav ul {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+                margin-top: 10px;
+            }
+
+            .hero-text h1 {
+                font-size: 2em;
+            }
+
+            .sticky-nav {
+                width: 90%;
+            }
+
+            .sticky-nav ul li {
+                margin: 0 5px;
+            }
+
+            .sticky-nav ul li a {
+                font-size: 1em;
+            }
+
+            .hero-image {
+                width: 100%;
+                height: 50%;
+            }
+        }
+
+        /* User Profile Dropdown */
+        .user-profile {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .user-profile-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: #FFFFFF;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            padding: 10px;
+            z-index: 101;
+        }
+
+        .user-profile-dropdown a {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: #7469B6;
+            transition: color 0.3s;
+        }
+
+        .user-profile-dropdown a:hover {
+            color: #E1AFD1;
+        }
+
+        .user-profile-dropdown a i {
+            margin-right: 5px;
+        }
+
+        .user-profile.active .user-profile-dropdown {
+            display: block;
+        }
+</style>
+</head>
+<body>
+<header>
+    <div class="logo">Nadia</div>
+    <nav>
+        <ul>
+            <li><a href="#gallery"><i class="fas fa-images"></i> Gallery</a></li>
+            <li><a href="#about" onclick="toggleSection('about')"><i class="fas fa-info-circle"></i> About</a></li>
+            <li><a href="login_register"><i class="fas fa-sign-in-alt"></i> Log In</a></li>
+        </ul>
+    </nav>
+</header>
+<section class="hero">
+    <div class="hero-text">
+        <h1>Unleash Your Creativity with <span>Nadia</span></h1>
+        <a href="chat" class="button">Try Nadia</a>
+    </div>
+    <div class="hero-image"></div>
+</section>
+<div class="sticky-nav">
+    <ul>
+        <li><a href="#gallery"><i class="fas fa-images"></i> Gallery</a></li>
+        <li><a href="#about" onclick="toggleSection('about')"><i class="fas fa-info-circle"></i> About</a></li>
+        <li><a href="login_register"><i class="fas fa-sign-in-alt"></i> Log In</a></li>
+    </ul>
+</div>
+<section class="section gallery" id="gallery">
+    <div class="gallery-slideshow">
+        <div class="gallery-item active">
+            <img src="{{ url_for('static', filename='gallery/image1.jpeg') }}" alt="Image 1">
+            <p>A whimsical scene of Hello Kitty sitting on a cloud, surrounded by vibrant colors and soft, fluffy textures.</p>
+        </div>
+        <div class="gallery-item">
+            <img src="{{ url_for('static', filename='gallery/image2.jpeg') }}" alt="Image 2">
+            <p>Pinkish-purple clouds with ethereal, dreamlike, and whimsical atmosphere.</p>
+        </div>
+        <div class="gallery-item">
+            <img src="{{ url_for('static', filename='gallery/image3.jpeg') }}" alt="Image 3">
+            <p>A close-up shot of a pink ladybug, showcasing its delicate features, vibrant pink color, and intricate details.</p>
+        </div>
+        <div class="gallery-item">
+            <img src="{{ url_for('static', filename='gallery/image4.jpeg') }}" alt="Image 1">
+    
+            <p>Stunning galaxy in space with vibrant, swirling colors.</p>
+        </div>
+        <div class="gallery-item">
+            <img src="{{ url_for('static', filename='gallery/image5.jpeg') }}" alt="Image 1">
+    
+            <p>Close up image of a Sakura.</p>
+        </div>
+        <div class="gallery-item">
+            <img src="{{ url_for('static', filename='gallery/image6.jpeg') }}" alt="Image 1">
+    
+            <p>Image of the night city, cyberpunk style.</p>
+        </div>
+        <div class="gallery-item">
+            <img src="{{ url_for('static', filename='gallery/image7.jpeg') }}" alt="Image 1">
+    
+            <p>Close up image of a Koenigsegg jesko.</p>
+        </div>
+        <div class="gallery-item">
+            <img src="{{ url_for('static', filename='gallery/image8.jpeg') }}" alt="Image 1">
+    
+            <p>Close up image of a Crocodile.</p>
+        </div> <div class="gallery-item">
+        <img src="{{ url_for('static', filename='gallery/image9.jpeg') }}" alt="Image 1">
+
+        <p>Close up image of a blue fish.</p>
+        </div>
+        <div class="gallery-item">
+            <img src="{{ url_for('static', filename='gallery/image10.jpeg') }}" alt="Image 1">
+    
+            <p>Close up image of a vault filled with gold.</p>
+        </div>
+    
+
+        <!-- Add more gallery items here -->
+    </div>
+    <button class="gallery-nav gallery-nav-left" onclick="prevSlide()">&#10094;</button>
+    <button class="gallery-nav gallery-nav-right" onclick="nextSlide()">&#10095;</button>
+</section>
+
+<section id="about" class="about section">
+    <div class="about-content">
+        <h1>About Nadia</h1>
+        <p>Nadia is your AI assistant, designed to empower your creativity and help you unleash your imagination. With Nadia, the possibilities are endless.</p>
+        <div class="about-features">
+            <div class="feature">
+                <i class="fas fa-palette"></i>
+                <h2>Creative Assistant</h2>
+                <p>Nadia is here to help with your queries, providing swift and accurate responses. She can assist with image generation, answering questions, and more.</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-rocket"></i>
+                <h2>Fast and Efficient</h2>
+                <p>Nadia is designed to be fast and efficient. Whether you need an image generated or a question answered, Nadia will provide a swift response.</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-heart"></i>
+                <h2>User-Friendly</h2>
+                <p>Nadia's interface is designed to be user-friendly. Whether you're a beginner or an expert, you'll find navigating Nadia's features easy and intuitive.</p>
+            </div>
+        </div>
+    </div>
+</section>
+<footer>
+    <p>&copy; 2024 Nadia. All rights reserved.</p>
+</footer>
+
+<script>
+    let currentSlide = 0;
+    function showSlide(index) {
+    const slides = document.querySelectorAll('.gallery-item');
+    const totalSlides = slides.length;
+
+    if (index >= totalSlides) {
+        currentSlide = 0;
+    } else if (index < 0) {
+        currentSlide = totalSlides - 1;
+    } else {
+        currentSlide = index;
+    }
+
+    const offset = -currentSlide * 100;
+    document.querySelector('.gallery-slideshow').style.transform = `translateX(${offset}%)`;
+}
+
+function nextSlide() {
+    showSlide(currentSlide + 1);
+}
+
+function prevSlide() {
+    showSlide(currentSlide - 1);
+}
+
+// Initialize the slideshow
+showSlide(currentSlide);
+    function toggleSection(sectionId) {
+        document.querySelectorAll('.section').forEach(section => {
+            section.classList.remove('section-active');
+        });
+        document.getElementById(sectionId).classList.add('section-active');
+    }
+
+</script>
+</body>
+</html>
