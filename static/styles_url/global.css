@@ -437,18 +437,32 @@ body::-webkit-scrollbar {
         padding: 10px;
     }
 
-    #user-input {
-        flex-direction: column;
-    }
-
     #message {
-        width: 100%;
-        margin-bottom: 10px;
-        margin-right: 0;
+        padding: 5px;
+        font-size: 1em;
     }
 
     #send {
-        width: 100%;
+        padding: 5px 10px;
+        font-size: 1em;
     }
 
+    .copy-button {
+        padding: 3px 5px;
+        font-size: 0.85em;
+    }
+
+    #popup {
+        font-size: 1em;
+    }
+
+    .ascii-art {
+        font-size: 0.50em; /* Adjusted to fit smaller screens */
+    }
+
+    .draggable {
+        width: 80%;
+        left: 10%;
+        top: 10%;
+    }
 }
