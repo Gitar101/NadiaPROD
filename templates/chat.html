@@ -281,10 +281,14 @@
                 imageElement.alt = 'Assistant Response Image';
                 imageElement.style.maxWidth = '100%';
                 imageElement.style.height = 'auto';
+                imageElement.style.borderRadius = '30px'; // Add this line to curve the edges
                 messageElement.appendChild(imageElement);
                 chat.appendChild(messageElement);
                 chat.scrollTop = chat.scrollHeight;
             }
+
+
+
 
             function copyToClipboard(text) {
                 const textarea = document.createElement('textarea');

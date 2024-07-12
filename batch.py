@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from groq import AsyncGroq
 from werkzeug.security import generate_password_hash, check_password_hash
 import asyncio
+import base64
 import groq
 import re
 import subprocess
@@ -226,8 +227,12 @@ def chat1():
     return jsonify(response)
 
 async def get_completion(conversation_history):
-    retries = 2
-    delay = 10
+    retries = 1000000
+    delay = 0.2
+
+    # Check if the last message in the conversation history is asking for an image
+    if conversation_history and "image" in conversation_history[-1]["content"].lower():
+        conversation_history.append({"role": "assistant", "content": "Your image is being generated."})
 
     for attempt in range(retries):
         api_key, api_index = get_next_api_key()
@@ -254,7 +259,7 @@ async def get_completion(conversation_history):
             if attempt < retries - 1:
                 logger.warning(f"Service unavailable, retrying in {delay} seconds...")
                 await asyncio.sleep(delay)
-                delay *= 2
+                delay += 0.3
             else:
                 logger.error(f"Service unavailable after {retries} attempts: {e}")
                 return {'response': "Service is currently unavailable. Please try again later.", 'image_url': None}
@@ -273,9 +278,32 @@ async def get_completion(conversation_history):
     image_url_match = re.search(r'(https?://[^\s]+)', response_text)
     if image_url_match:
         image_url = image_url_match.group(0)
-        response_text = response_text.replace(image_url, '')
+        response_text = response_text.replace(image_url, "")
+
+        # Fetch the image preview with a timeout of 10 seconds
+        for attempt in range(retries):
+            try:
+                async with httpx.AsyncClient(timeout=10) as client:
+                    response = await client.get(image_url)
+                    if response.status_code == 200:
+                        # Encode the image data as base64
+                        image_data = base64.b64encode(response.content).decode('utf-8')
+                        image_url = f"data:image/png;base64,{image_data}"
+                        break
+            except httpx.ReadTimeout:
+                if attempt < retries - 1:
+                    logger.warning(f"Image URL not loaded, retrying in {delay} seconds...")
+                    await asyncio.sleep(delay)
+                    delay *= 2
+                else:
+                    logger.error(f"Image URL not loaded after {retries} attempts.")
+                    image_url = None
 
     return {'response': response_text.strip(), 'image_url': image_url}
+
+
+
+
 
 @app.route('/restart', methods=['POST'])
 def restart_server():
