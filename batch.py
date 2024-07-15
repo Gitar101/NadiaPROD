@@ -212,6 +212,13 @@ def chat1():
         db.session.add(chat_history)
 
     user_message = request.json.get('message')
+
+    # Check if the user's message starts with "image"
+    if user_message.lower().startswith("image"):
+        # Switch to the image preset
+        image_preset = "Your image preset text here"
+        conversation_history.append({"role": "system", "content": image_preset})
+
     conversation_history.append({"role": "user", "content": user_message})
 
     while len(conversation_history) > 1 + 8:
@@ -226,9 +233,10 @@ def chat1():
 
     return jsonify(response)
 
+
 async def get_completion(conversation_history):
-    retries = 1000000
-    delay = 0.2
+    retries = 13
+    delay = 0.05
 
     # Check if the last message in the conversation history is asking for an image
     if conversation_history and "image" in conversation_history[-1]["content"].lower():
@@ -243,7 +251,7 @@ async def get_completion(conversation_history):
             completion = await client.chat.completions.create(
                 model="llama3-70b-8192",
                 messages=conversation_history,
-                temperature=0.3,
+                temperature=0,
                 max_tokens=2000,
                 top_p=1,
                 stop=None

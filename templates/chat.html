@@ -54,6 +54,7 @@
 
     <!-- Chat Interface -->
     <div id="chat-container">
+        
         <div id="chat">
             <div id="ascii-art" class="ascii-art">
                 <pre>
@@ -70,7 +71,7 @@
 
         </div>
         <form id="user-input">
-            <textarea id="message" placeholder="Ask anything..." rows="2" maxlength="4000"></textarea>
+            <textarea id="message" placeholder="Ask anything..." rows="2" maxlength="3000"></textarea>
             <button id="send">↪</button>
         </form>
     </div>
@@ -94,6 +95,11 @@
 
             const username = "{{ username }}";
             let isCooldown = false;
+            let imagePromptSent = false;
+            let currentPromptFile = 'default.txt'; // Default prompt file
+            let imagePromptActivated = false;
+
+
 
             // Settings Button functionality
             settingsModernButton.addEventListener('click', () => {
@@ -225,20 +231,40 @@
                 for (const line of lines) {
                     displayMessage(username, line, 'user');
                 }
-
+            
                 messageInput.value = '';
-
+            
                 try {
+                    // Check if the message starts with "image"
+                    if (message.toLowerCase().startsWith("image")) {
+                        currentPromptFile = 'imagesys.txt'; // Image preset file
+                        imagePromptActivated = true;
+                    }
+                
+                    // Change the prompt before sending the message, only if the image prompt has been activated and it's the first message
+                    if (imagePromptActivated && !imagePromptSent) {
+                        await fetch('/change_prompt', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                prompt_file: currentPromptFile
+                            })
+                        });
+                        imagePromptSent = true;
+                    }
+                
                     const response = await fetch('/chat1', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ message })
                     });
-
+                
                     if (!response.ok) {
                         throw new Error('Failed to fetch response');
                     }
-
+                
                     const data = await response.json();
                     displayMessage('Nadia', data.response, 'assistant');
                     if (data.image_url) {
@@ -248,7 +274,7 @@
                     console.error('Error sending message:', error);
                     alert('Failed to send message. Please try again later.');
                 }
-
+            
                 setTimeout(() => {
                     isCooldown = false;
                     messageInput.disabled = false;
@@ -256,22 +282,48 @@
                 }, 10000);
             }
 
+
+
+
             function displayMessage(sender, message, cssClass) {
                 const messageElement = document.createElement('div');
                 messageElement.className = `message ${cssClass}`;
-                messageElement.innerHTML = `<strong>${sender}:</strong> <pre style="white-space: pre-wrap; margin: 0;">${message}</pre>`;
+                const senderElement = document.createElement('strong');
+                senderElement.textContent = `${sender}: `;
+                messageElement.appendChild(senderElement);
 
-                if (cssClass === 'assistant' && message.startsWith("\n") && message.endsWith("\n")) {
-                    const copyButton = document.createElement('button');
-                    copyButton.className = 'copy-button';
-                    copyButton.textContent = 'Copy';
-                    copyButton.addEventListener('click', () => copyToClipboard(message));
-                    messageElement.appendChild(copyButton);
+                if (sender === 'Nadia') {
+                    // If the sender is Nadia, simulate the typing effect
+                    const textElement = document.createElement('span');
+                    messageElement.appendChild(textElement);
+                    chat.appendChild(messageElement);
+                
+                    let i = 0;
+                    const typingInterval = setInterval(() => {
+                        if (i < message.length) {
+                            textElement.textContent += message.charAt(i);
+                            i++;
+                            chat.scrollTop = chat.scrollHeight; // Scroll to the bottom
+                        } else {
+                            clearInterval(typingInterval);
+                        }
+                    }, 1); // Set the typing speed to 1ms to scroll to the bottom every single letter
+                } else {
+                    // If the sender is not Nadia, display the message without the typing effect
+                    const textElement = document.createElement('span');
+                    textElement.textContent = message;
+                    messageElement.appendChild(textElement);
                 }
-
+            
                 chat.appendChild(messageElement);
-                chat.scrollTop = chat.scrollHeight;
+                chat.scrollTop = chat.scrollHeight; // Scroll to the bottom
             }
+
+
+
+
+
+
 
             function displayImage(imageUrl, cssClass) {
                 const messageElement = document.createElement('div');
