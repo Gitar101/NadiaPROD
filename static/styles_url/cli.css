@@ -10,6 +10,9 @@ body {
     font-size: 1.15em;
     overflow-x: hidden; /* Disable horizontal scrolling */
 }
+
+
+
 #settings-button button {
     padding: 10px 20px;
     border: none;
