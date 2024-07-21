@@ -235,8 +235,8 @@ def chat1():
 
 
 async def get_completion(conversation_history):
-    retries = 13
-    delay = 0.05
+    retries = 15
+    delay = 0.1
 
     # Check if the last message in the conversation history is asking for an image
     if conversation_history and "image" in conversation_history[-1]["content"].lower():
