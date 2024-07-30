@@ -1,5 +1,8 @@
 import json
+import random
 import os
+import random
+
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_from_directory
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
@@ -7,6 +10,10 @@ from groq import AsyncGroq
 from werkzeug.security import generate_password_hash, check_password_hash
 import asyncio
 import base64
+from httpx import URL, Proxy, Timeout, Response, ASGITransport
+from httpx import URL, Proxy, Timeout, Response, ASGITransport
+
+
 import groq
 import re
 import subprocess
@@ -235,8 +242,8 @@ def chat1():
 
 
 async def get_completion(conversation_history):
-    retries = 13
-    delay = 0.05
+    retries = 15
+    delay = 0.1
 
     # Check if the last message in the conversation history is asking for an image
     if conversation_history and "image" in conversation_history[-1]["content"].lower():
