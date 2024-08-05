@@ -10,3 +10,4 @@ asyncio
 python-dotenv
 psycopg2
 flask-sqlalchemy
+psycopg2-binary==2.9.5
