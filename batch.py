@@ -21,7 +21,7 @@ import logging
 import httpx
 from threading import Thread
 from dotenv import load_dotenv
-from dotenv import load_dotenv
+
 
 load_dotenv()
 app = Flask(__name__)
