@@ -1,6 +1,7 @@
 import json
 import random
 import os
+import psycopg2
 import random
 
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_from_directory
@@ -12,8 +13,6 @@ import asyncio
 import base64
 from httpx import URL, Proxy, Timeout, Response, ASGITransport
 from httpx import URL, Proxy, Timeout, Response, ASGITransport
-
-
 import groq
 import re
 import subprocess
@@ -29,7 +28,7 @@ app.config['SECRET_KEY'] = 'your_secret_key'
 bcrypt = Bcrypt(app)
 
 # Use PostgreSQL database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://nadiadb_user:OB2AaVyFBSqCAfeErbxGQHRscg7xj6cF@dpg-cq428tjv2p9s73egp1m0-a.singapore-postgres.render.com/nadiadb'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://avnadmin:AVNS_h90GoFmmAWu3da7SkAz@pg-2cd7f170-hamogh-15b6.e.aivencloud.com:13630/defaultdb?sslmode=require'
 db = SQLAlchemy(app)
 
 class User(db.Model):
