@@ -28,7 +28,7 @@ app.config['SECRET_KEY'] = 'your_secret_key'
 bcrypt = Bcrypt(app)
 
 # Use PostgreSQL database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://avnadmin:AVNS_h90GoFmmAWu3da7SkAz@pg-2cd7f170-hamogh-15b6.e.aivencloud.com:13630/defaultdb?sslmode=require'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://avnadmin:AVNS_h90GoFmmAWu3da7SkAz@pg-2cd7f170-hamogh-15b6.e.aivencloud.com:13630/defaultdb?sslmode=require'
 db = SQLAlchemy(app)
 
 class User(db.Model):
