@@ -8,6 +8,4 @@ Werkzeug==2.1.2
 httpx==0.23.0
 asyncio
 python-dotenv
-psycopg2
-flask-sqlalchemy
-psycopg2-binary==2.9.5
+psycopg2-binary
