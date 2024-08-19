@@ -242,7 +242,7 @@ def chat1():
 
 
 async def get_completion(conversation_history):
-    retries = 15
+    retries = 20
     delay = 0.1
 
     # Check if the last message in the conversation history is asking for an image
@@ -298,7 +298,7 @@ async def get_completion(conversation_history):
         # Fetch the image preview with a timeout of 10 seconds
         for attempt in range(retries):
             try:
-                async with httpx.AsyncClient(timeout=10) as client:
+                async with httpx.AsyncClient(timeout=60) as client:
                     response = await client.get(image_url)
                     if response.status_code == 200:
                         # Encode the image data as base64
