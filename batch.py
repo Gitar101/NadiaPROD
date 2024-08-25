@@ -345,6 +345,12 @@ async def get_completion(conversation_history):
 def generate_image(prompt):
     # Random seed generation for image consistency
     random_seed = random.randint(1, 1024)
+    user_keys = [
+        '9eb521dbec421d18499b7b7c3af994aa507113d965891af8894374d9e1cf9d26',
+        'c218a0319b0d00616c1ddc1efd63ca4f6029a6b2cd7de5378376c5219342b1ba',
+        '5d5b9bb0c875b833249e8a5030f26ec3119d5ef4d7157e7b43496a81e4ccaabb'
+    ]
+    user_key = random.choice(user_keys)
 
     # API endpoint for generating the image
     generate_url = "https://image-generation.perchance.org/api/generate"
@@ -358,7 +364,7 @@ def generate_image(prompt):
         'negativePrompt': 'Bad anatomy, Bad facial features, bad attention to detail, deformed, ugly, deformed hands, more than 5 fingers',
         'channel': 'ai-character-generator',
         'subChannel': 'private',
-        'userKey': 'df188e095bc9f2776181af1e241940624b966cd22108bf2d2628cdc1ec9f498e',
+        'userKey': user_key,
     }
 
     # Send GET request to generate the image
