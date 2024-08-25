@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="Black">
-    <option name="sdkName" value="Python 3.12 (Nadia-Web-Dev-Repo-2cc9aebff2d9ebf4b9f194ffcdbc2dd92065b3a2)" />
-  </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_22" default="true" project-jdk-name="Python 3.12 (Nadia-Web-Dev-Repo-2cc9aebff2d9ebf4b9f194ffcdbc2dd92065b3a2)" project-jdk-type="Python SDK">
-    <output url="file://$PROJECT_DIR$/out" />
-  </component>
-</project>
