@@ -248,15 +248,13 @@ def chat1():
 
 async def get_completion(conversation_history):
     retries = 20
-<<<<<<< HEAD
     delay = 0.5
-=======
-    delay = 0.1
+
 
     # Check if the last message in the conversation history is asking for an image
     if conversation_history and "image" in conversation_history[-1]["content"].lower():
         conversation_history.append({"role": "assistant", "content": "Your image is being generated."})
->>>>>>> a67dd912c789b7d67a6d072ea3c6f509d8e340b1
+
 
     for attempt in range(retries):
         api_key, api_index = get_next_api_key()
