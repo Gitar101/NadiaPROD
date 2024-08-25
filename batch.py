@@ -248,7 +248,9 @@ def chat1():
 
 async def get_completion(conversation_history):
     retries = 20
+
     delay = 0.5
+
 
 
     # Check if the last message in the conversation history is asking for an image
@@ -356,7 +358,7 @@ def generate_image(prompt):
         'negativePrompt': 'Bad anatomy, Bad facial features, bad attention to detail, deformed, ugly, deformed hands, more than 5 fingers',
         'channel': 'ai-character-generator',
         'subChannel': 'private',
-        'userKey': 'c218a0319b0d00616c1ddc1efd63ca4f6029a6b2cd7de5378376c5219342b1ba',
+        'userKey': 'df188e095bc9f2776181af1e241940624b966cd22108bf2d2628cdc1ec9f498e',
     }
 
     # Send GET request to generate the image
