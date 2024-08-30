@@ -168,28 +168,7 @@ document.addEventListener("DOMContentLoaded", () =>
 
         try {
             // Check if the message contains both "anime" and "image"
-            if (message.toLowerCase().includes("anime") && message.toLowerCase().includes("image")) {
-                if (!isImageSysPrompt || currentPromptFile !== "anime.txt") {
-                    const response = await fetch("/change_prompt", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                            prompt_file: "anime.txt",
-                            prompt_text: ""
-                        })
-                    });
-
-                    if (!response.ok) {
-                        throw new Error("Failed to change prompt to anime.txt");
-                    }
-                    isImageSysPrompt = true;
-                    currentPromptFile = "anime.txt"; // Track the current prompt file
-                }
-            }
-            // Check for image prompt logic
-            else if (message.toLowerCase().startsWith("image ")) {
+			 if (message.toLowerCase().startsWith("image ")) {
                 if (!isImageSysPrompt || currentPromptFile !== "imagesys.txt") {
                     const response = await fetch("/change_prompt", {
                         method: "POST",
@@ -246,7 +225,7 @@ document.addEventListener("DOMContentLoaded", () =>
                 isCooldown = false;
                 messageInput.disabled = false;
                 sendButton.disabled = false;
-            }, 10000);
+            }, 0);
         }
     }
 

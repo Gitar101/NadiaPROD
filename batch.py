@@ -267,8 +267,8 @@ async def get_completion(conversation_history):
             completion = await client.chat.completions.create(
                 model="llama3-70b-8192",
                 messages=conversation_history,
-                temperature=0,
-                max_tokens=8000,
+                temperature=0.1,
+                max_tokens=2000,
                 top_p=1,
                 stop=None
             )
@@ -297,14 +297,6 @@ async def get_completion(conversation_history):
         response_text = completion.message['content']
 
     # Check if the response contains an image prompt
-    image_prompt_match = re.search(r'code774883:\s*(.*)', response_text, re.IGNORECASE)
-    if image_prompt_match:
-        # Extract the prompt without the "code774883:"
-        prompt_text = image_prompt_match.group(1).strip()
-        image_base64 = generate_image(prompt_text)
-
-        # Return the response with only the stripped prompt text (keep the rest of the response intact)
-        return {'response': re.sub(r'code774883:\s*', '', response_text).strip(), 'image_url': image_base64}
 
     # Check for image URLs in the response
     image_url = None
@@ -342,62 +334,7 @@ async def get_completion(conversation_history):
     return {'response': response_text.strip(), 'image_url': image_url}
 
 
-def generate_image(prompt):
-    # Random seed generation for image consistency
-    random_seed = random.randint(1, 1024)
-    user_keys = [
-        '9eb521dbec421d18499b7b7c3af994aa507113d965891af8894374d9e1cf9d26',
-        'c218a0319b0d00616c1ddc1efd63ca4f6029a6b2cd7de5378376c5219342b1ba',
-        '5d5b9bb0c875b833249e8a5030f26ec3119d5ef4d7157e7b43496a81e4ccaabb'
-    ]
-    user_key = random.choice(user_keys)
 
-    # API endpoint for generating the image
-    generate_url = "https://image-generation.perchance.org/api/generate"
-
-    # Parameters for the image generation request
-    params = {
-        'prompt': prompt,
-        'seed': str(random_seed),
-        'resolution': '512x768',
-        'guidanceScale': '7',
-        'negativePrompt': 'Bad anatomy, Bad facial features, bad attention to detail, deformed, ugly, deformed hands, more than 5 fingers',
-        'channel': 'ai-character-generator',
-        'subChannel': 'private',
-        'userKey': user_key,
-    }
-
-    # Send GET request to generate the image
-    response = requests.get(generate_url, params=params)
-
-    if response.status_code == 200:
-        data = response.json()
-
-        if data["status"] == "success":
-            image_id = data["imageId"]
-
-            # Wait for a few seconds to allow the image to be generated
-            time.sleep(5)
-
-            # API endpoint for downloading the image
-            download_url = f"https://image-generation.perchance.org/api/downloadTemporaryImage?imageId={image_id}"
-
-            # Send GET request to download the image
-            image_response = requests.get(download_url)
-
-            if image_response.status_code == 200:
-                # Convert the image to base64
-                image_base64 = base64.b64encode(image_response.content).decode('utf-8')
-                return f"data:image/png;base64,{image_base64}"
-            else:
-                print(f"Failed to download image. Status code: {image_response.status_code}")
-                return None
-        else:
-            print("Image generation failed.")
-            return None
-    else:
-        print(f"Request failed with status code {response.status_code}")
-        return None
 
 
 
@@ -469,6 +406,6 @@ if __name__ == '__main__':
     try:
         with app.app_context():
             db.create_all()
-        app.run(host='0.0.0.0', debug=True)
+        app.run(host='0.0.0.0', port ='7000', debug=True)
     finally:
         asyncio.get_event_loop().close()
