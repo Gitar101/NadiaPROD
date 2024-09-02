@@ -248,15 +248,11 @@ def chat1():
 
 async def get_completion(conversation_history):
     retries = 20
-
     delay = 0.5
-
-
 
     # Check if the last message in the conversation history is asking for an image
     if conversation_history and "image" in conversation_history[-1]["content"].lower():
         conversation_history.append({"role": "assistant", "content": "Your image is being generated."})
-
 
     for attempt in range(retries):
         api_key, api_index = get_next_api_key()
@@ -265,9 +261,9 @@ async def get_completion(conversation_history):
 
         try:
             completion = await client.chat.completions.create(
-                model="llama3-70b-8192",
+                model="llama-3.1-70b-versatile",
                 messages=conversation_history,
-                temperature=0.1,
+                temperature=0.5,
                 max_tokens=2000,
                 top_p=1,
                 stop=None
@@ -296,43 +292,64 @@ async def get_completion(conversation_history):
     else:
         response_text = completion.message['content']
 
-    # Check if the response contains an image prompt
+    logger.info("Response received: %s", response_text)
 
-    # Check for image URLs in the response
+    # Initialize image_url to None
     image_url = None
-    image_url_match = re.search(r'(https?://[^\s]+)', response_text)
-    if image_url_match:
-        image_url = image_url_match.group(0)
-        response_text = response_text.replace(image_url, "")
 
-        # Fetch the image preview with a timeout of 10 seconds
-        for attempt in range(retries):
-            try:
-                async with httpx.AsyncClient(timeout=60) as client:
-                    response = await client.get(image_url)
-                    if response.status_code == 200:
-                        # Encode the image data as base64
-                        image_data = base64.b64encode(response.content).decode('utf-8')
-                        image_url = f"data:image/png;base64,{image_data}"
-                        print("Using Polinations")
-                        break
-            except httpx.ReadTimeout:
-                if attempt < retries - 1:
-                    logger.warning(f"Image URL not loaded, retrying in {delay} seconds...")
-                    await asyncio.sleep(delay)
-                    delay *= 2
-                else:
-                    logger.error(f"Image URL not loaded after {retries} attempts.")
-                    image_url = None
-                    print("Using Perchance")
+    # Split the response into lines
+    lines = response_text.split('\n', 1)
+    first_line = lines[0].strip()
 
-    if image_url is None:
-        print("Using Perchance.")
+    # Process only the first line if it starts with "IMAGEN:"
+    if first_line.startswith("IMAGEN:"):
+        logger.info("Processing Flux prompt...")
+        # Extract prompts
+        match = re.search(r"IMAGEN:(.*?)(?:NEGATIVE:(.*))?$", first_line, re.DOTALL)
+        if match:
+            image_prompt = match.group(1).strip().replace(' ', '%20')
+            negative_prompt = match.group(2).strip().replace(' ', '%20') if match.group(2) else ""
+            # Construct the image generation URL
+            image_generation_url = f"https://image.pollinations.ai/prompt/{image_prompt}?width=1000&height=1000&model=flux&negative={negative_prompt}&nologo=True"
 
-    conversation_history.append({"role": "assistant", "content": response_text})
+            logger.info("Generated image URL: %s", image_generation_url)
 
+            # Fetch the image preview with a timeout of 60 seconds
+            for attempt in range(retries):
+                try:
+                    async with httpx.AsyncClient(timeout=60) as client:
+                        response = await client.get(image_generation_url)
+                        if response.status_code == 200:
+                            # Encode the image data as base64
+                            image_data = base64.b64encode(response.content).decode('utf-8')
+                            image_url = f"data:image/png;base64,{image_data}"
+                            logger.info("Image fetched and encoded successfully.")
+                            break
+                        else:
+                            logger.error(f"Failed to fetch image. Status code: {response.status_code}")
+                except httpx.ReadTimeout:
+                    if attempt < retries - 1:
+                        logger.warning(f"Image URL not loaded, retrying in {delay} seconds...")
+                        await asyncio.sleep(delay)
+                        delay *= 2
+                    else:
+                        logger.error(f"Image URL not loaded after {retries} attempts.")
+                        image_url = None
+
+        # Use the remaining text from the response
+        remaining_text = lines[1].strip() if len(lines) > 1 else ""
+        response_text = remaining_text
+
+        # Remove the IMAGEN and negative prompt from the response text
+        response_text = re.sub(r"IMAGEN:.*(?:NEGATIVE:.*)?", "", response_text, flags=re.DOTALL).strip()
+        logger.info("Cleaned response text: %s", response_text)
+
+    # Append the final response text to conversation history
+    conversation_history.append({"role": "assistant", "content": response_text.strip()})
+
+    # Final logging and return
+    logger.info("Final response text: %s", response_text)
     return {'response': response_text.strip(), 'image_url': image_url}
-
 
 
 
@@ -406,6 +423,6 @@ if __name__ == '__main__':
     try:
         with app.app_context():
             db.create_all()
-        app.run(host='0.0.0.0', port ='7000', debug=True)
+        app.run(host='0.0.0.0', port ='5000', debug=True)
     finally:
         asyncio.get_event_loop().close()

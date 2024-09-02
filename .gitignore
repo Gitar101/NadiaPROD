@@ -3,3 +3,4 @@ build
 .env
 users.db
 .venv
+venv
