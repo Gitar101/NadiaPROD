@@ -359,7 +359,7 @@ async def get_completion(conversation_history, websocket=None):
     logger.info("Final response text: %s", response_text)
     return {'response': response_text.strip(), 'image_url': image_url}
 
-
+#asdads
 
 
 
