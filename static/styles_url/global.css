@@ -12,6 +12,7 @@ body {
 }
 
 
+
 #modern-open-settings {
     display: block;
     padding: 10px 20px;
@@ -145,7 +146,7 @@ body {
 #chat-container {
 
     width: 90%;
-    max-width: 1000px;
+    max-width: 1200px;
     background-color: #404242;
     background-size: 400% 400%;
 
@@ -210,7 +211,7 @@ body {
     border: none;
     outline: none;
     font-family: 'Rajdhani', sans-serif;
-    font-size: 1.15em;
+    font-size: 15px;
     border-radius: 30px;
     margin-right: 10px;
 }
@@ -222,7 +223,7 @@ body {
     color: #FFFFFF;
     cursor: pointer;
     font-family: 'Rajdhani', sans-serif;
-    font-size: 1.15em;
+    font-size: 25px;
     border-radius: 30px;
 }
 
@@ -231,12 +232,12 @@ body {
 }
 
 .username {
-    font-size: 28px;
+    font-size: 20px;
     font-weight: bold;
     padding: 2px 6px;
     margin-bottom: 3px;
     border-radius: 15px;
-    background: linear-gradient(90deg, #ff5f7e, #fc9842);
+    background: linear-gradient(40deg, #fa5f7e, #fc9842);
     display: inline-block;
 }
 .user-container {
@@ -247,45 +248,12 @@ body {
 
 
 
-@media (max-width: 768px) {
-    #user-input {
-        flex-direction: row;
-        padding: 10px;
-        width: calc(100% - 20px); /* Ensure the user-input container takes the full width with some padding */
 
-        position: fixed;
-        bottom: 0;
-        left: 0;
-
-        z-index: 1000; /* Keep it above other content */
-    }
-
-    #message {
-        flex: 1;
-        margin-right: 10px;
-        font-size: 1em;
-    }
-
-    #send {
-        flex-shrink: 0;
-        margin-right: 10px;
-        font-size: 1em;
-    }
-
-    .username {
-
-        font-size: 1em;
-    }
-
-    #chat-container {
-        padding-bottom: 70px; /* Add padding to the bottom to accommodate the user input box */
-    }
-}
 
 
 
 .message {
-    font-size: 30px;
+    font-size: 15px; /* Default font size for mobile */
     padding: 5px 10px;
     margin-bottom: 5px;
     display: flex;
@@ -358,18 +326,7 @@ body {
     overflow: hidden;
 }
 
-#message {
-    flex: 1;
-    padding: 10px;
-    background-color: transparent;
-    color: #FFFFFF;
-    border: none;
-    outline: none;
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 1.15em;
-    border-radius: 30px;
-    margin-right: 10px;
-}
+
 
 #send {
     padding: 10px 20px;
@@ -378,7 +335,7 @@ body {
     color: #FFFFFF;
     cursor: pointer;
     font-family: 'Rajdhani', sans-serif;
-    font-size: 1.15em;
+    font-size: 15px;
     border-radius: 30px;
 }
 
@@ -422,6 +379,11 @@ body {
     }
     50% {
         opacity: 1;
+    }
+}
+@media (min-width: 769px) { /* Adjust the breakpoint as needed */
+    .message {
+        font-size: 25px; /* Font size for laptops */
     }
 }
 
@@ -516,21 +478,21 @@ body {
 
 @media (max-width: 768px) {
     #logo {
-        width: 100%; /* Adjust this value as needed */
-        height: 100%;
+        width: 80%; /* Adjust this value as needed */
+        height: 80%;
     }
     body {
-        font-size: 1em;
+        font-size: 0.8em;
     }
 
     #chat-container {
-        width: 95%;
+        width: 100%;
         padding: 10px;
     }
 
     #message {
         padding: 5px;
-        font-size: 1em;
+        font-size: 0.9em;
     }
 
     #send {
@@ -545,13 +507,5 @@ body {
 
     #popup {
         font-size: 1em;
-    }
-
-
-
-    .draggable {
-        width: 80%;
-        left: 10%;
-        top: 10%;
     }
 }

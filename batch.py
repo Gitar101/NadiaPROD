@@ -135,7 +135,7 @@ def register():
         return jsonify({"success": True, "redirect_url": url_for('chat')})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
-    
+
 
 
 @app.route('/login', methods=['POST'])
@@ -157,7 +157,7 @@ def login():
         return jsonify({"success": True, "redirect_url": url_for('chat')})
     else:
         return jsonify({"success": False, "error": "Invalid credentials"})
-    
+
 @app.route('/regenerate_response', methods=['POST'])
 def regenerate_response():
     if 'username' not in session:
@@ -246,13 +246,9 @@ def chat1():
 
 
 
-async def get_completion(conversation_history):
+async def get_completion(conversation_history, websocket=None):
     retries = 20
     delay = 0.5
-
-    # Check if the last message in the conversation history is asking for an image
-    if conversation_history and "image" in conversation_history[-1]["content"].lower():
-        conversation_history.append({"role": "assistant", "content": "Your image is being generated."})
 
     for attempt in range(retries):
         api_key, api_index = get_next_api_key()
@@ -260,13 +256,15 @@ async def get_completion(conversation_history):
         client = AsyncGroq(api_key=api_key)
 
         try:
+            # Use streaming option if available
             completion = await client.chat.completions.create(
                 model="llama-3.1-70b-versatile",
                 messages=conversation_history,
-                temperature=0.5,
+                temperature=0.4,
                 max_tokens=2000,
                 top_p=1,
-                stop=None
+                stop=None,
+                stream=True  # Enabling streaming
             )
             if completion is not None:
                 break
@@ -287,31 +285,44 @@ async def get_completion(conversation_history):
     if completion is None:
         return {'response': "Unable to fetch response. Please try again later.", 'image_url': None}
 
-    if hasattr(completion, 'choices') and completion.choices:
-        response_text = completion.choices[0].message.content
-    else:
-        response_text = completion.message['content']
-
-    logger.info("Response received: %s", response_text)
-
-    # Initialize image_url to None
+    response_text = ""
     image_url = None
 
-    # Split the response into lines
+    # Stream each token as it is received
+    try:
+        async for chunk in completion:
+            if hasattr(chunk, 'choices') and chunk.choices:
+                # Extract the content from the 'delta' attribute
+                delta_content = chunk.choices[0].delta.content if chunk.choices[0].delta.content else ''
+
+                response_text += delta_content
+
+                # If connected to a WebSocket, send streamed response incrementally
+                if websocket is not None:
+                    await websocket.send_json({'response': response_text.strip()})
+
+                logger.info("Streaming token: %s", delta_content)
+
+        logger.info("Full streamed response: %s", response_text)
+    except Exception as e:
+        logger.error(f"Error during streaming: {e}")
+        return {'response': "Error occurred during streaming. Please try again later.", 'image_url': None}
+
+    # Process image prompt if the response contains "IMAGEN:"
     lines = response_text.split('\n', 1)
     first_line = lines[0].strip()
 
-    # Process only the first line if it starts with "IMAGEN:"
     if first_line.startswith("IMAGEN:"):
         logger.info("Processing Flux prompt...")
-        # Extract prompts
+
+        # Extract prompts for image generation
         match = re.search(r"IMAGEN:(.*?)(?:NEGATIVE:(.*))?$", first_line, re.DOTALL)
         if match:
             image_prompt = match.group(1).strip().replace(' ', '%20')
             negative_prompt = match.group(2).strip().replace(' ', '%20') if match.group(2) else ""
+
             # Construct the image generation URL
             image_generation_url = f"https://image.pollinations.ai/prompt/{image_prompt}?width=1000&height=1000&model=flux&negative={negative_prompt}&nologo=True"
-
             logger.info("Generated image URL: %s", image_generation_url)
 
             # Fetch the image preview with a timeout of 60 seconds
@@ -336,12 +347,9 @@ async def get_completion(conversation_history):
                         logger.error(f"Image URL not loaded after {retries} attempts.")
                         image_url = None
 
-        # Use the remaining text from the response
-        remaining_text = lines[1].strip() if len(lines) > 1 else ""
-        response_text = remaining_text
-
         # Remove the IMAGEN and negative prompt from the response text
-        response_text = re.sub(r"IMAGEN:.*(?:NEGATIVE:.*)?", "", response_text, flags=re.DOTALL).strip()
+        remaining_text = lines[1].strip() if len(lines) > 1 else ""
+        response_text = re.sub(r"IMAGEN:.*(?:NEGATIVE:.*)?", "", remaining_text, flags=re.DOTALL).strip()
         logger.info("Cleaned response text: %s", response_text)
 
     # Append the final response text to conversation history
@@ -350,6 +358,7 @@ async def get_completion(conversation_history):
     # Final logging and return
     logger.info("Final response text: %s", response_text)
     return {'response': response_text.strip(), 'image_url': image_url}
+
 
 
 

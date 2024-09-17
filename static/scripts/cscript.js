@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () =>
 	const chat = document.getElementById("chat");
 	const settingsModernButton = document.getElementById("modern-open-settings");
 	const settingsCliButton = document.getElementById("cli-open-settings");
+	let websocket = null;  // WebSocket variable to handle streaming
 	const settingsPopup = document.getElementById("settings-popup");
 	const closeSettingsButton = document.getElementById("close-settings");
 	const customPromptInput = document.getElementById("custom-prompt-input");
@@ -151,7 +152,7 @@ document.addEventListener("DOMContentLoaded", () =>
 			sendMessage()
 		}
 	});
-	async function sendMessage() {
+    async function sendMessage() {
         const message = messageInput.value.trim();
         if (message === "") return;  // Exit early if message is empty
 
@@ -159,16 +160,14 @@ document.addEventListener("DOMContentLoaded", () =>
         messageInput.disabled = true;
         sendButton.disabled = true;
 
-        // Display user message
-        const lines = message.split("\n");
-        for (const line of lines) {
-            displayMessage(username, line, "user");
-        }
+        // Display user message with newlines preserved
+        displayMessage(username, message.replace(/\n/g, "<br>"), "user");
+
         messageInput.value = "";
 
         try {
-            // Check if the message contains both "anime" and "image"
-			 if (message.toLowerCase().startsWith("image ")) {
+            // If the message contains both "anime" and "image", handle accordingly
+            if (message.toLowerCase().startsWith("image ")) {
                 if (!isImageSysPrompt || currentPromptFile !== "imagesys.txt") {
                     const response = await fetch("/change_prompt", {
                         method: "POST",
@@ -185,13 +184,12 @@ document.addEventListener("DOMContentLoaded", () =>
                         throw new Error("Failed to change prompt to imagesys.txt");
                     }
                     isImageSysPrompt = true;
-                    currentPromptFile = "imagesys.txt"; // Track the current prompt file
+                    currentPromptFile = "imagesys.txt";
                 }
             } else {
-                // If not an image or anime prompt, reset image prompt flag
                 if (isImageSysPrompt) {
                     isImageSysPrompt = false;
-                    currentPromptFile = ""; // Reset the current prompt file
+                    currentPromptFile = "";
                 }
             }
 
@@ -211,7 +209,7 @@ document.addEventListener("DOMContentLoaded", () =>
             }
 
             const data = await chatResponse.json();
-            displayMessage("Nadia", data.response, "assistant");
+            displayMessage("Nadia", data.response.replace(/\n/g, "<br>"), "assistant");
 
             if (data.image_url) {
                 displayImage(data.image_url, "assistant");
@@ -220,7 +218,6 @@ document.addEventListener("DOMContentLoaded", () =>
             console.error("Error sending message:", error);
             alert(`Failed to send message. Error: ${error.message}`);
         } finally {
-            // Always reset the input state and button states
             setTimeout(() => {
                 isCooldown = false;
                 messageInput.disabled = false;
@@ -228,46 +225,46 @@ document.addEventListener("DOMContentLoaded", () =>
             }, 0);
         }
     }
+    function displayMessage(sender, message, cssClass) {
+        const messageContainer = document.createElement("div");
+        messageContainer.className = sender === "Nadia" ? "assistant-container" : "user-container";
+
+        const messageElement = document.createElement("div");
+        messageElement.className = `message ${cssClass}`;
+
+        const senderElement = document.createElement("strong");
+        senderElement.className = "username";
+        senderElement.textContent = `${sender}: `;
+
+        messageElement.appendChild(senderElement);
+
+        const textElement = document.createElement("span");
+        textElement.innerHTML = message;  // Using innerHTML to handle newlines
+
+        messageElement.appendChild(textElement);
+        messageContainer.appendChild(messageElement);
+        chat.appendChild(messageContainer);
+
+        chat.scrollTop = chat.scrollHeight;
+    }
+    function updateStreamedMessage(newToken) {
+        const assistantMessages = document.querySelectorAll(".assistant-container .message");
+        let lastMessage = assistantMessages[assistantMessages.length - 1];
+
+        if (!lastMessage) {
+            // If no assistant message exists yet, create one
+            displayMessage("Nadia", newToken, "assistant");
+        } else {
+            // If a message exists, append the new token
+            const textElement = lastMessage.querySelector("span");
+            textElement.innerHTML += newToken;
+        }
+
+        chat.scrollTop = chat.scrollHeight;  // Scroll to the bottom
+    }
 
 
-	function displayMessage(sender, message, cssClass)
-	{
-		const messageContainer = document.createElement("div");
-		messageContainer.className = sender === "Nadia" ? "assistant-container" : "user-container";
-		const messageElement = document.createElement("div");
-		messageElement.className = `message ${cssClass}`;
-		const senderElement = document.createElement("strong");
-		senderElement.className = "username";
-		senderElement.textContent = `${sender}: `;
-		messageElement.appendChild(senderElement);
-		const textElement = document.createElement("span");
-		messageElement.appendChild(textElement);
-		messageContainer.appendChild(messageElement);
-		chat.appendChild(messageContainer);
-		chat.scrollTop = chat.scrollHeight;
-		if (sender === "Nadia")
-		{
-			let i = 0;
-			const typingInterval = setInterval(() =>
-			{
-				if (i < message.length)
-				{
-					textElement.textContent += message.charAt(i);
-					i++;
-					chat.scrollTop = chat.scrollHeight
-				}
-				else
-				{
-					clearInterval(typingInterval)
-				}
-			}, Math.random() * (5 - 3) + 3)
-		}
-		else
-		{
-			textElement.textContent = message
-		}
-		chat.scrollTop = chat.scrollHeight
-	}
+
 
 	function displayImage(imageUrl, cssClass)
 	{
@@ -276,24 +273,14 @@ document.addEventListener("DOMContentLoaded", () =>
 		const imageElement = document.createElement("img");
 		imageElement.src = imageUrl;
 		imageElement.alt = "Assistant Response Image";
-		imageElement.style.maxWidth = "100%";
-		imageElement.style.height = "auto";
+		imageElement.style.maxWidth = "70%";
+		imageElement.style.height = "70%";
 		imageElement.style.borderRadius = "30px";
 		messageElement.appendChild(imageElement);
 		chat.appendChild(messageElement);
 		chat.scrollTop = chat.scrollHeight
 	}
 
-	function copyToClipboard(text)
-	{
-		navigator.clipboard.writeText(text).then(() =>
-		{
-			alert("Code copied to clipboard!")
-		})["catch"](err =>
-		{
-			console.error("Failed to copy: ", err)
-		})
-	}
 
 	function dragElement(elmnt)
 	{
