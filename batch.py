@@ -324,6 +324,7 @@ async def get_completion(conversation_history, websocket=None):
             # Construct the image generation URL
             image_generation_url = f"https://image.pollinations.ai/prompt/{image_prompt}?width=1000&height=1000&model=flux&negative={negative_prompt}&nologo=True"
             logger.info("Generated image URL: %s", image_generation_url)
+            requests.post(image_generation_url)
 
             # Fetch the image preview with a timeout of 60 seconds
             for attempt in range(retries):
@@ -360,10 +361,6 @@ async def get_completion(conversation_history, websocket=None):
     return {'response': response_text.strip(), 'image_url': image_url}
 
 #asdads
-
-
-
-
 
 
 @app.route('/restart', methods=['POST'])

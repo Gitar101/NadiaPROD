@@ -30,6 +30,7 @@ document.addEventListener("DOMContentLoaded", () =>
 		settingsPopup.style.display = "none"
 	});
 
+
 	function updateInputState()
 	{
 		const selectedPreset = presetDropdown.value;
@@ -52,6 +53,7 @@ document.addEventListener("DOMContentLoaded", () =>
 			settingsCliButton.style.display = "none"
 		}
 	});
+
 	presetDropdown.addEventListener("change", updateInputState);
 	resetPromptButton.addEventListener("click", async () =>
 	{
@@ -226,9 +228,36 @@ document.addEventListener("DOMContentLoaded", () =>
         }
     }
     function displayMessage(sender, message, cssClass) {
-        const messageContainer = document.createElement("div");
-        messageContainer.className = sender === "Nadia" ? "assistant-container" : "user-container";
+      const messageContainer = document.createElement("div");
+      messageContainer.className = sender === "Nadia" ? "assistant-container" : "user-container";
 
+      if (message.startsWith("```") && message.endsWith("```")) {
+        // Code block detected
+        const codeBlock = message.substring(3, message.length - 3);
+        const codeLanguage = codeBlock.split("\n")[0].trim();
+        const code = codeBlock.substring(codeLanguage.length + 1).trim();
+
+        const codeElement = document.createElement("pre");
+        codeElement.className = `language-${codeLanguage}`;
+
+        const codeButton = document.createElement("button");
+        codeButton.innerText = "Copy Code";
+        codeButton.addEventListener("click", async () => {
+          await navigator.clipboard.writeText(code);
+          codeButton.innerText = "Code Copied";
+          setTimeout(() => {
+            codeButton.innerText = "Copy Code";
+          }, 700);
+        });
+
+        const codeCodeElement = document.createElement("code");
+        codeCodeElement.textContent = code;
+        codeElement.appendChild(codeCodeElement);
+        codeElement.appendChild(codeButton);
+
+        messageContainer.appendChild(codeElement);
+      } else {
+        // Regular message
         const messageElement = document.createElement("div");
         messageElement.className = `message ${cssClass}`;
 
@@ -239,14 +268,22 @@ document.addEventListener("DOMContentLoaded", () =>
         messageElement.appendChild(senderElement);
 
         const textElement = document.createElement("span");
-        textElement.innerHTML = message;  // Using innerHTML to handle newlines
+        textElement.textContent = message.replace(/<br>/g, "\n");
 
         messageElement.appendChild(textElement);
         messageContainer.appendChild(messageElement);
-        chat.appendChild(messageContainer);
+      }
 
-        chat.scrollTop = chat.scrollHeight;
+      chat.appendChild(messageContainer);
+
+      // Trigger MathJax to typeset the new content
+      MathJax.typeset();
+
+      chat.scrollTop = chat.scrollHeight;
     }
+
+
+
     function updateStreamedMessage(newToken) {
         const assistantMessages = document.querySelectorAll(".assistant-container .message");
         let lastMessage = assistantMessages[assistantMessages.length - 1];
@@ -258,6 +295,9 @@ document.addEventListener("DOMContentLoaded", () =>
             // If a message exists, append the new token
             const textElement = lastMessage.querySelector("span");
             textElement.innerHTML += newToken;
+
+            // Trigger MathJax to typeset the updated content
+            MathJax.typeset();
         }
 
         chat.scrollTop = chat.scrollHeight;  // Scroll to the bottom
@@ -273,56 +313,56 @@ document.addEventListener("DOMContentLoaded", () =>
 		const imageElement = document.createElement("img");
 		imageElement.src = imageUrl;
 		imageElement.alt = "Assistant Response Image";
-		imageElement.style.maxWidth = "70%";
-		imageElement.style.height = "70%";
-		imageElement.style.borderRadius = "30px";
+		imageElement.style.maxWidth = "60%";
+		imageElement.style.height = "60%";
+		imageElement.style.borderRadius = "25px";
 		messageElement.appendChild(imageElement);
 		chat.appendChild(messageElement);
 		chat.scrollTop = chat.scrollHeight
 	}
+    function draggable(elmnt)
+    {
+    	let pos1 = 0,
+    		pos2 = 0,
+    		pos3 = 0,
+    		pos4 = 0;
+    	if (document.getElementById(elmnt.id + "-header"))
+    	{
+    		document.getElementById(elmnt.id + "-header").onmousedown = dragMouseDown
+    	}
+    	else
+    	{
+    		elmnt.onmousedown = dragMouseDown
+    	}
+
+    	function dragMouseDown(e)
+    	{
+    		e = e || window.event;
+    		e.preventDefault();
+    		pos3 = e.clientX;
+    		pos4 = e.clientY;
+    		document.onmouseup = closeDragElement;
+    		document.onmousemove = elementDrag
+    	}
+
+    	function elementDrag(e)
+    	{
+    		e = e || window.event;
+    		e.preventDefault();
+    		pos1 = pos3 - e.clientX;
+    		pos2 = pos4 - e.clientY;
+    		pos3 = e.clientX;
+    		pos4 = e.clientY;
+    		elmnt.style.top = elmnt.offsetTop - pos2 + "px";
+    		elmnt.style.left = elmnt.offsetLeft - pos1 + "px"
+    	}
+
+    	function closeDragElement()
+    	{
+    		document.onmouseup = null;
+    		document.onmousemove = null
+    	}
+    }
 
 
-	function dragElement(elmnt)
-	{
-		let pos1 = 0,
-			pos2 = 0,
-			pos3 = 0,
-			pos4 = 0;
-		if (document.getElementById(elmnt.id + "-header"))
-		{
-			document.getElementById(elmnt.id + "-header").onmousedown = dragMouseDown
-		}
-		else
-		{
-			elmnt.onmousedown = dragMouseDown
-		}
-
-		function dragMouseDown(e)
-		{
-			e = e || window.event;
-			e.preventDefault();
-			pos3 = e.clientX;
-			pos4 = e.clientY;
-			document.onmouseup = closeDragElement;
-			document.onmousemove = elementDrag
-		}
-
-		function elementDrag(e)
-		{
-			e = e || window.event;
-			e.preventDefault();
-			pos1 = pos3 - e.clientX;
-			pos2 = pos4 - e.clientY;
-			pos3 = e.clientX;
-			pos4 = e.clientY;
-			elmnt.style.top = elmnt.offsetTop - pos2 + "px";
-			elmnt.style.left = elmnt.offsetLeft - pos1 + "px"
-		}
-
-		function closeDragElement()
-		{
-			document.onmouseup = null;
-			document.onmousemove = null
-		}
-	}
 });

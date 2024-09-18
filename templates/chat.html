@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/themes/prism.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/components/prism-python.min.js"></script>
 
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
@@ -74,19 +75,17 @@
         </div>
     </div>
 
-    <!-- Chat Interface -->
-    <div id="chat-container">
-        <div id="chat">
-            <div id="ascii-art" class="ascii-art">
-                <pre>
-    <img src="static/logo.png" alt="Logo" id="logo">
-    </pre>
-            </div>
-
+    <div id="chat">
+        <div id="ascii-art" class="ascii-art">
+            <pre>
+      <img src="static/logo.png" alt="Logo" id="logo">
+            </pre>
         </div>
+    </div>
+
 
         <form id="user-input">
-            <textarea id="message" placeholder="Ask anything..." wrap="hard" maxlength="2500"></textarea>
+            <textarea id="message" placeholder="Ask anything..." wrap="hard" maxlength="10500"></textarea>
             <button type="submit" id="send">Enter</button>
         </form>
 

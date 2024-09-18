@@ -1,15 +1,14 @@
-body {
-    transform-origin: center;
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
     background-color: #404242;
     color: #FFFFFF;
     font-family: 'Rajdhani', sans-serif;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    overflow: hidden;
+    flex-direction: column;
 }
+
 
 
 
@@ -94,9 +93,11 @@ body {
     text-align: center;
 }
 
-#custom-prompt {
+
+
+#settings-popup {
     display: none;
-    position: fixed;
+    position: center;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -172,18 +173,17 @@ body {
     overflow: hidden;
 }
 
-.chatbox img {
+.chat img {
     max-width: 100%;
     height: auto;
     display: block;
-    margin-bottom: 10px;
+
 }
 
 #chat {
-    height: calc(100% - 80px);
+    flex: 1;
     overflow-y: scroll;
     padding: 20px;
-    margin-bottom: 10px;
     white-space: pre-wrap;
     box-sizing: border-box;
     scroll-behavior: smooth;
@@ -214,6 +214,9 @@ body {
     font-size: 15px;
     border-radius: 30px;
     margin-right: 10px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+
 }
 
 #send {
@@ -299,6 +302,56 @@ body {
     text-align: left;
     background-color: #333; /* Consistent background */
 }
+
+
+/* code for copy code */
+
+.code-container {
+    background-color: #f4f4f4;
+    border: 1px solid #e1e1e1;
+    border-radius: 5px;
+    margin: 10px 0;
+    padding: 10px;
+    position: relative;
+}
+
+.code-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #ececec;
+    border-bottom: 1px solid #ddd;
+    padding: 8px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    border-radius: 5px 5px 0 0;
+}
+
+.code-language {
+    font-size: 14px;
+    color: #333;
+}
+
+.copy-code-button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background-color 0.3s;
+}
+
+.copy-code-button:hover {
+    background-color: #0056b3;
+}
+
+
+
+
+
+
 #mic {
     background: none;
     border: none;
