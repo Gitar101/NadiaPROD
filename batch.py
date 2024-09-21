@@ -1,30 +1,20 @@
+import asyncio
+import base64
 import json
-import random
+import logging
 import os
+import re
 import time
 
-import psycopg2
-import random
-
+import groq
+import httpx
 import requests
+from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_from_directory
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
 from groq import AsyncGroq
 from werkzeug.security import generate_password_hash, check_password_hash
-import asyncio
-import base64
-from httpx import URL, Proxy, Timeout, Response, ASGITransport
-from httpx import URL, Proxy, Timeout, Response, ASGITransport
-import groq
-import re
-import subprocess
-import sys
-import logging
-import httpx
-from threading import Thread
-from dotenv import load_dotenv
-
 
 load_dotenv()
 app = Flask(__name__)
