@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/themes/prism.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/prism.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/components/prism-python.min.js"></script>
 
@@ -85,8 +87,9 @@
 
 
         <form id="user-input">
-            <textarea id="message" placeholder="Ask anything..." wrap="hard" maxlength="10500"></textarea>
+            <textarea id="message" rows="3" placeholder="Ask anything..." wrap="hard" maxlength="10500"></textarea>
             <button type="submit" id="send">Enter</button>
+
         </form>
 
 
@@ -97,7 +100,7 @@
         const username = "{{ username }}"; // Replace with the actual username variable
 
         document.addEventListener('DOMContentLoaded', (event) => {
-            document.querySelector('.username').innerText = username.toLowerCase();
+            document.querySelector('.username').innerText = {{username}}.toLowerCase();
         });
 
 

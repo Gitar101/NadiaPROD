@@ -85,7 +85,7 @@ body {
         nav ul li a:hover {
             color: #E1AFD1;
         }
-        
+
 
         .hero {
             position: relative;
@@ -192,7 +192,7 @@ body {
             right: 0;
         }
 
-        
+
         footer {
             text-align: center;
             padding: 20px 0;
@@ -333,7 +333,21 @@ body {
         .user-profile.active .user-profile-dropdown {
             display: block;
         }
-</style>
+        .gallery-item {
+            position: relative;
+            width: 700px; /* Set the width */
+            height: 400px; /* Set the height */
+            overflow: hidden; /* Hide overflow */
+        }
+
+        .gallery-item img {
+            width: 100%; /* Make image fill the container */
+            height: auto; /* Maintain aspect ratio */
+            max-height: 100%; /* Ensure it doesn't exceed the height */
+            object-fit: cover; /* Cover the area while maintaining aspect ratio */
+        }
+
+    </style>
 </head>
 <body>
 <header>
@@ -363,58 +377,55 @@ body {
 <section class="section gallery" id="gallery">
     <div class="gallery-slideshow">
         <div class="gallery-item active">
-            <img src="{{ url_for('static', filename='gallery/image1.jpeg') }}" alt="Image 1">
+            <img src="{{ url_for('static', filename='gallery/banner.png') }}" alt="Logo">
+            <p>Nadia, TTT and TTI generator.</p>
+        </div>
+        <div class="gallery-item active">
+            <img src="{{ url_for('static', filename='gallery/image1.png') }}" alt="Image 1">
             <p>A whimsical scene of Hello Kitty sitting on a cloud, surrounded by vibrant colors and soft, fluffy textures.</p>
         </div>
         <div class="gallery-item">
-            <img src="{{ url_for('static', filename='gallery/image2.jpeg') }}" alt="Image 2">
+            <img src="{{ url_for('static', filename='gallery/image2.png') }}" alt="Image 2">
             <p>Pinkish-purple clouds with ethereal, dreamlike, and whimsical atmosphere.</p>
         </div>
         <div class="gallery-item">
-            <img src="{{ url_for('static', filename='gallery/image3.jpeg') }}" alt="Image 3">
+            <img src="{{ url_for('static', filename='gallery/image3.png') }}" alt="Image 3">
             <p>A close-up shot of a pink ladybug, showcasing its delicate features, vibrant pink color, and intricate details.</p>
         </div>
         <div class="gallery-item">
-            <img src="{{ url_for('static', filename='gallery/image4.jpeg') }}" alt="Image 1">
-    
+            <img src="{{ url_for('static', filename='gallery/image4.png') }}" alt="Image 1">
             <p>Stunning galaxy in space with vibrant, swirling colors.</p>
         </div>
         <div class="gallery-item">
-            <img src="{{ url_for('static', filename='gallery/image5.jpeg') }}" alt="Image 1">
-    
+            <img src="{{ url_for('static', filename='gallery/image5.png') }}" alt="Image 1">
             <p>Close up image of a Sakura.</p>
         </div>
         <div class="gallery-item">
-            <img src="{{ url_for('static', filename='gallery/image6.jpeg') }}" alt="Image 1">
-    
+            <img src="{{ url_for('static', filename='gallery/image6.png') }}" alt="Image 1">
             <p>Image of the night city, cyberpunk style.</p>
         </div>
         <div class="gallery-item">
-            <img src="{{ url_for('static', filename='gallery/image7.jpeg') }}" alt="Image 1">
-    
+            <img src="{{ url_for('static', filename='gallery/image7.png') }}" alt="Image 1">
             <p>Close up image of a Koenigsegg jesko.</p>
         </div>
         <div class="gallery-item">
-            <img src="{{ url_for('static', filename='gallery/image8.jpeg') }}" alt="Image 1">
-    
+            <img src="{{ url_for('static', filename='gallery/image8.png') }}" alt="Image 1">
             <p>Close up image of a Crocodile.</p>
-        </div> <div class="gallery-item">
-        <img src="{{ url_for('static', filename='gallery/image9.jpeg') }}" alt="Image 1">
-
-        <p>Close up image of a blue fish.</p>
         </div>
         <div class="gallery-item">
-            <img src="{{ url_for('static', filename='gallery/image10.jpeg') }}" alt="Image 1">
-    
+            <img src="{{ url_for('static', filename='gallery/image9.png') }}" alt="Image 1">
+            <p>Close up image of a blue fish.</p>
+        </div>
+        <div class="gallery-item">
+            <img src="{{ url_for('static', filename='gallery/image10.png') }}" alt="Image 1">
             <p>Close up image of a vault filled with gold.</p>
         </div>
-    
-
         <!-- Add more gallery items here -->
     </div>
     <button class="gallery-nav gallery-nav-left" onclick="prevSlide()">&#10094;</button>
     <button class="gallery-nav gallery-nav-right" onclick="nextSlide()">&#10095;</button>
 </section>
+
 
 <section id="about" class="about section">
     <div class="about-content">

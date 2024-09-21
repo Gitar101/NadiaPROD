@@ -174,7 +174,7 @@ html, body {
 }
 
 .chat img {
-    max-width: 100%;
+    max-width: 20%;
     height: auto;
     display: block;
 
@@ -267,7 +267,11 @@ html, body {
     position: relative;
     flex-direction: column;
 }
-
+.message img {
+  max-width: 40%;
+  height: auto;
+  border-radius: 25px;
+}
 .copy-button {
     position: absolute;
     top: 5px;
@@ -397,19 +401,19 @@ html, body {
 }
 
 
-.regenerate-button {
-    background: none;
-    border: none;
-    color: #000000;
+.regenerate-icon {
     cursor: pointer;
-    padding: 0;
-    font-size: 1rem;
-    margin-left: 10px;
+    display: inline-block;
+    margin-top: 5px; /* Space above the icon */
+    font-size: 20px; /* Adjust size as needed */
+    color: #b677bf; /* Color of the icon */
+}
+.regenerate-icon.disabled {
+    color: gray; /* Change color to indicate it's disabled */
+    cursor: not-allowed; /* Change cursor style */
 }
 
-.regenerate-button:hover {
-    color: #707070;
-}
+
 
 #cooldown-popup {
     display: none;
@@ -534,6 +538,10 @@ html, body {
         width: 80%; /* Adjust this value as needed */
         height: 80%;
     }
+    .message img {
+        max-width: 50%;
+        height: 50%;
+      }
     body {
         font-size: 0.8em;
     }

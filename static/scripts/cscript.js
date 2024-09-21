@@ -1,22 +1,23 @@
-document.addEventListener("DOMContentLoaded", () =>
-{
-	const messageForm = document.getElementById("user-input");
-	const messageInput = document.getElementById("message");
-	const sendButton = document.getElementById("send");
-	const chat = document.getElementById("chat");
-	const settingsModernButton = document.getElementById("modern-open-settings");
-	const settingsCliButton = document.getElementById("cli-open-settings");
-	let websocket = null;  // WebSocket variable to handle streaming
-	const settingsPopup = document.getElementById("settings-popup");
-	const closeSettingsButton = document.getElementById("close-settings");
-	const customPromptInput = document.getElementById("custom-prompt-input");
-	const submitPromptButton = document.getElementById("submit-prompt");
-	const resetPromptButton = document.getElementById("reset-prompt");
-	const presetDropdown = document.getElementById("preset-dropdown");
-	const themeDropdown = document.getElementById("theme-dropdown");
-	const selectedTheme = themeDropdown.value;
-	let isCooldown = false;
-	let isImageSysPrompt = false;
+document.addEventListener("DOMContentLoaded", () => {
+    const messageForm = document.getElementById("user-input");
+    const messageInput = document.getElementById("message");
+    const sendButton = document.getElementById("send");
+    const chat = document.getElementById("chat");
+    const settingsModernButton = document.getElementById("modern-open-settings");
+    const settingsCliButton = document.getElementById("cli-open-settings");
+    let websocket = null;  // WebSocket variable to handle streaming
+    const settingsPopup = document.getElementById("settings-popup");
+    const closeSettingsButton = document.getElementById("close-settings");
+    const customPromptInput = document.getElementById("custom-prompt-input");
+    const submitPromptButton = document.getElementById("submit-prompt");
+    const regenerationCounts = new Map(); // To track regeneration counts
+    const resetPromptButton = document.getElementById("reset-prompt");
+    const presetDropdown = document.getElementById("preset-dropdown");
+    const themeDropdown = document.getElementById("theme-dropdown");
+    const selectedTheme = themeDropdown.value;
+    let isCooldown = false;
+    let isImageSysPrompt = false;
+    let lastUserMessage = ""; // Save the last user message
 	settingsModernButton.addEventListener("click", () =>
 	{
 		settingsPopup.style.display = "block"
@@ -168,8 +169,8 @@ document.addEventListener("DOMContentLoaded", () =>
         messageInput.value = "";
 
         try {
-            // If the message contains both "anime" and "image", handle accordingly
-            if (message.toLowerCase().startsWith("image ")) {
+            // Handle "image" or "generate" messages
+            if (message.toLowerCase().startsWith("image ") || message.toLowerCase().startsWith("generate ")) {
                 if (!isImageSysPrompt || currentPromptFile !== "imagesys.txt") {
                     const response = await fetch("/change_prompt", {
                         method: "POST",
@@ -227,37 +228,11 @@ document.addEventListener("DOMContentLoaded", () =>
             }, 0);
         }
     }
+
     function displayMessage(sender, message, cssClass) {
-      const messageContainer = document.createElement("div");
-      messageContainer.className = sender === "Nadia" ? "assistant-container" : "user-container";
+        const messageContainer = document.createElement("div");
+        messageContainer.className = sender === "Nadia" ? "assistant-container" : "user-container";
 
-      if (message.startsWith("```") && message.endsWith("```")) {
-        // Code block detected
-        const codeBlock = message.substring(3, message.length - 3);
-        const codeLanguage = codeBlock.split("\n")[0].trim();
-        const code = codeBlock.substring(codeLanguage.length + 1).trim();
-
-        const codeElement = document.createElement("pre");
-        codeElement.className = `language-${codeLanguage}`;
-
-        const codeButton = document.createElement("button");
-        codeButton.innerText = "Copy Code";
-        codeButton.addEventListener("click", async () => {
-          await navigator.clipboard.writeText(code);
-          codeButton.innerText = "Code Copied";
-          setTimeout(() => {
-            codeButton.innerText = "Copy Code";
-          }, 700);
-        });
-
-        const codeCodeElement = document.createElement("code");
-        codeCodeElement.textContent = code;
-        codeElement.appendChild(codeCodeElement);
-        codeElement.appendChild(codeButton);
-
-        messageContainer.appendChild(codeElement);
-      } else {
-        // Regular message
         const messageElement = document.createElement("div");
         messageElement.className = `message ${cssClass}`;
 
@@ -268,20 +243,81 @@ document.addEventListener("DOMContentLoaded", () =>
         messageElement.appendChild(senderElement);
 
         const textElement = document.createElement("span");
-        textElement.textContent = message.replace(/<br>/g, "\n");
+        textElement.innerHTML = message;
 
         messageElement.appendChild(textElement);
         messageContainer.appendChild(messageElement);
-      }
 
-      chat.appendChild(messageContainer);
+        // Initialize the regeneration count for this message
+        let currentCount = regenerationCounts.get(message) || 0;
 
-      // Trigger MathJax to typeset the new content
-      MathJax.typeset();
+        // If the message is from the assistant, add a regenerate icon
+        if (sender === "Nadia") {
+            const regenerateIcon = document.createElement("i");
+            regenerateIcon.className = "fas fa-sync regenerate-icon"; // Font Awesome icon class
 
-      chat.scrollTop = chat.scrollHeight;
+            // Disable icon if the count has reached the cap
+            if (currentCount >= 3) {
+                regenerateIcon.style.pointerEvents = "none"; // Disable clicking
+                regenerateIcon.classList.add("disabled"); // Optionally add a class for styling
+            }
+
+            regenerateIcon.addEventListener("click", async () => {
+                if (currentCount >= 3) return; // Prevent further regeneration if cap is reached
+
+                // Disable the icon to prevent multiple clicks
+                regenerateIcon.style.pointerEvents = "none";
+                regenerateIcon.classList.add("fa-spin"); // Add spinning effect
+
+                // Get the last assistant message
+                const lastAssistantMessage = messageContainer;
+
+                try {
+                    const regenerateResponse = await fetch("/regenerate_response", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        }
+                    });
+
+                    if (!regenerateResponse.ok) {
+                        throw new Error("Failed to regenerate response.");
+                    }
+
+                    const data = await regenerateResponse.json();
+
+                    // Replace the old response with the new one
+                    lastAssistantMessage.querySelector("span").innerHTML = data.response.replace(/\n/g, "<br>");
+
+                    // Update the regeneration count
+                    currentCount++;
+                    regenerationCounts.set(message, currentCount);
+
+                    // Disable the icon if the count has reached the cap
+                    if (currentCount >= 2) {
+                        regenerateIcon.style.pointerEvents = "none"; // Disable clicking
+                        regenerateIcon.classList.add("disabled"); // Add disabled class
+                    }
+                } catch (error) {
+                    console.error("Error regenerating response:", error);
+                    alert(`Failed to regenerate response. Error: ${error.message}`);
+                } finally {
+                    // Re-enable the icon
+                    regenerateIcon.style.pointerEvents = "auto";
+                    regenerateIcon.classList.remove("fa-spin"); // Remove spinning effect
+                }
+            });
+
+            messageContainer.appendChild(regenerateIcon);
+        }
+
+        chat.appendChild(messageContainer);
+
+        // Trigger MathJax to typeset the new content
+        MathJax.typeset();
+
+        chat.scrollTop = chat.scrollHeight;
     }
-
 
 
     function updateStreamedMessage(newToken) {
@@ -303,23 +339,19 @@ document.addEventListener("DOMContentLoaded", () =>
         chat.scrollTop = chat.scrollHeight;  // Scroll to the bottom
     }
 
-
-
-
-	function displayImage(imageUrl, cssClass)
-	{
-		const messageElement = document.createElement("div");
-		messageElement.className = `message ${cssClass}`;
-		const imageElement = document.createElement("img");
-		imageElement.src = imageUrl;
-		imageElement.alt = "Assistant Response Image";
-		imageElement.style.maxWidth = "60%";
-		imageElement.style.height = "60%";
-		imageElement.style.borderRadius = "25px";
-		messageElement.appendChild(imageElement);
-		chat.appendChild(messageElement);
-		chat.scrollTop = chat.scrollHeight
-	}
+    function displayImage(imageUrl, cssClass) {
+        const messageElement = document.createElement("div");
+        messageElement.className = `message ${cssClass}`;
+        const imageElement = document.createElement("img");
+        imageElement.src = imageUrl;
+        imageElement.alt = "Assistant Response Image";
+        imageElement.style.maxWidth = "70%";
+        imageElement.style.height = "70%";
+        imageElement.style.borderRadius = "25px";
+        messageElement.appendChild(imageElement);
+        chat.appendChild(messageElement);
+        chat.scrollTop = chat.scrollHeight;
+    }
     function draggable(elmnt)
     {
     	let pos1 = 0,
@@ -363,6 +395,5 @@ document.addEventListener("DOMContentLoaded", () =>
     		document.onmousemove = null
     	}
     }
-
 
 });

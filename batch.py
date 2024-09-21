@@ -158,42 +158,6 @@ def login():
     else:
         return jsonify({"success": False, "error": "Invalid credentials"})
 
-@app.route('/regenerate_response', methods=['POST'])
-def regenerate_response():
-    if 'username' not in session:
-        return jsonify({"success": False, "error": "User not logged in"}), 401
-
-    user = User.query.filter_by(username=session['username']).first()
-    if not user:
-        return jsonify({"success": False, "error": "User not found"}), 404
-
-    data = request.get_json()
-    user_message = data.get('message')
-
-    chat_history = ChatHistory.query.filter_by(user_id=user.id).first()
-    if chat_history:
-        conversation_history = json.loads(chat_history.conversation)
-    else:
-        return jsonify({"success": False, "error": "Conversation history not found"}), 404
-
-    # Remove the last user message and assistant response from the conversation history
-    if len(conversation_history) >= 2:
-        conversation_history = conversation_history[:-2]
-
-    # Append the user message to the conversation history
-    conversation_history.append({"role": "user", "content": user_message})
-
-    response = asyncio.run(get_completion(conversation_history))
-
-    conversation_history.append({"role": "assistant", "content": response['response']})
-
-    chat_history.conversation = json.dumps(conversation_history)
-    db.session.commit()
-
-    return jsonify({"success": True, "response": response['response']})
-
-
-
 @app.route('/logout')
 def logout():
     session.pop('username', None)
@@ -202,6 +166,7 @@ def logout():
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(app.static_folder, 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
 
 @app.route('/chat1', methods=['POST'])
 def chat1():
@@ -242,7 +207,7 @@ def chat1():
     db.session.commit()
 
     return jsonify(response)
-    #test comment
+
 
 
 
@@ -252,7 +217,7 @@ async def get_completion(conversation_history, websocket=None):
 
     for attempt in range(retries):
         api_key, api_index = get_next_api_key()
-        logger.info(f"Using API Key: {api_key} (API {api_index + 1})")
+        logger.info(f"Using API Key:  (API {api_index + 1})")
         client = AsyncGroq(api_key=api_key)
 
         try:
@@ -260,8 +225,8 @@ async def get_completion(conversation_history, websocket=None):
             completion = await client.chat.completions.create(
                 model="llama-3.1-70b-versatile",
                 messages=conversation_history,
-                temperature=0.4,
-                max_tokens=2000,
+                temperature=0.5,
+                max_tokens=2500,
                 top_p=1,
                 stop=None,
                 stream=True  # Enabling streaming
@@ -290,6 +255,9 @@ async def get_completion(conversation_history, websocket=None):
 
     # Stream each token as it is received
     try:
+        total_tokens = 0
+        start_time = time.time()
+
         async for chunk in completion:
             if hasattr(chunk, 'choices') and chunk.choices:
                 # Extract the content from the 'delta' attribute
@@ -303,11 +271,20 @@ async def get_completion(conversation_history, websocket=None):
 
                 logger.info("Streaming token: %s", delta_content)
 
-        logger.info("Full streamed response: %s", response_text)
+                # Update total tokens
+                total_tokens += len(delta_content.split())
+
+        # Calculate average tokens per second for the entire response
+        elapsed_time = time.time() - start_time
+        print(elapsed_time)
+        if elapsed_time > 0:  # Avoid division by zero
+            average_tokens_per_second = total_tokens / elapsed_time
+            logger.info("Average tokens per second: %s", average_tokens_per_second)
     except Exception as e:
         logger.error(f"Error during streaming: {e}")
         return {'response': "Error occurred during streaming. Please try again later.", 'image_url': None}
 
+    # Process image prompt if the response contains "IMAGEN:"
     # Process image prompt if the response contains "IMAGEN:"
     lines = response_text.split('\n', 1)
     first_line = lines[0].strip()
@@ -315,15 +292,19 @@ async def get_completion(conversation_history, websocket=None):
     if first_line.startswith("IMAGEN:"):
         logger.info("Processing Flux prompt...")
 
-        # Extract prompts for image generation
-        match = re.search(r"IMAGEN:(.*?)(?:NEGATIVE:(.*))?$", first_line, re.DOTALL)
+        # Updated regex to include width and height
+        match = re.search(r"IMAGEN:(.*?)(?:NEGATIVE:(.*?))? W:\s*(\d+)\s*H:\s*(\d+)", first_line, re.DOTALL)
         if match:
             image_prompt = match.group(1).strip().replace(' ', '%20')
             negative_prompt = match.group(2).strip().replace(' ', '%20') if match.group(2) else ""
+            width = match.group(3)  # Extract width
+            height = match.group(4)  # Extract height
 
-            # Construct the image generation URL
-            image_generation_url = f"https://image.pollinations.ai/prompt/{image_prompt}?width=1000&height=1000&model=flux&negative={negative_prompt}&nologo=True"
+            # Construct the image generation URL with width and height
+            image_generation_url = f"https://image.pollinations.ai/prompt/{image_prompt}?width={width}&height={height}&model=flux&negative={negative_prompt}&nologo=True"
             logger.info("Generated image URL: %s", image_generation_url)
+
+            # Send request to generate the image
             requests.post(image_generation_url)
 
             # Fetch the image preview with a timeout of 60 seconds
@@ -348,10 +329,11 @@ async def get_completion(conversation_history, websocket=None):
                         logger.error(f"Image URL not loaded after {retries} attempts.")
                         image_url = None
 
-        # Remove the IMAGEN and negative prompt from the response text
+        # Clean up the response text
         remaining_text = lines[1].strip() if len(lines) > 1 else ""
         response_text = re.sub(r"IMAGEN:.*(?:NEGATIVE:.*)?", "", remaining_text, flags=re.DOTALL).strip()
         logger.info("Cleaned response text: %s", response_text)
+
 
     # Append the final response text to conversation history
     conversation_history.append({"role": "assistant", "content": response_text.strip()})
@@ -360,14 +342,52 @@ async def get_completion(conversation_history, websocket=None):
     logger.info("Final response text: %s", response_text)
     return {'response': response_text.strip(), 'image_url': image_url}
 
+
+
+
+
+
+@app.route('/regenerate_response', methods=['POST'])
+def regenerate_response():
+    if 'username' not in session:
+        return jsonify({"success": False, "error": "User not logged in"}), 401
+
+    user = User.query.filter_by(username=session['username']).first()
+    if not user:
+        return jsonify({"success": False, "error": "User not found"}), 404
+
+    chat_history = ChatHistory.query.filter_by(user_id=user.id).first()
+    if not chat_history:
+        return jsonify({"success": False, "error": "No conversation history found."}), 404
+
+    conversation_history = json.loads(chat_history.conversation)
+
+    # Find the last user question and clear conversation history
+    user_conversation = [msg for msg in conversation_history if msg['role'] == 'user']
+    assistant_conversation = [msg for msg in conversation_history if msg['role'] == 'assistant']
+
+    if not user_conversation or not assistant_conversation:
+        return jsonify({"success": False, "error": "No previous conversation to regenerate."}), 400
+
+    # Keep conversation history up to the last user message
+    last_user_message = user_conversation[-1]['content']
+    conversation_history = [{"role": "system", "content": default_system_prompt}]  # Reset history
+    conversation_history.append({"role": "user", "content": last_user_message})
+
+    # Generate new response
+    response = asyncio.run(get_completion(conversation_history))
+
+    # Update conversation history with new response
+    conversation_history.append({"role": "assistant", "content": response['response']})
+    chat_history.conversation = json.dumps(conversation_history)
+    db.session.commit()
+
+    return jsonify(response)
+
 #asdads
 
 
-@app.route('/restart', methods=['POST'])
-def restart_server():
-    logger.info("Restarting server...")
-    subprocess.Popen([sys.executable, os.path.join(os.path.dirname(__file__), 'restart_server.py')])
-    return '', 204
+
 
 @app.route('/change_prompt', methods=['POST'])
 def change_prompt():
