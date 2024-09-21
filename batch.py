@@ -1,8 +1,10 @@
 import asyncio
 import base64
+import datetime
 import json
 import logging
 import os
+import uuid
 import re
 import time
 
@@ -10,7 +12,7 @@ import groq
 import httpx
 import requests
 from dotenv import load_dotenv
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_from_directory, send_file
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
 from groq import AsyncGroq
@@ -350,29 +352,48 @@ def regenerate_response():
     if not chat_history:
         return jsonify({"success": False, "error": "No conversation history found."}), 404
 
+    # Load conversation history
     conversation_history = json.loads(chat_history.conversation)
 
-    # Find the last user question and clear conversation history
+    # Separate user and assistant messages
     user_conversation = [msg for msg in conversation_history if msg['role'] == 'user']
     assistant_conversation = [msg for msg in conversation_history if msg['role'] == 'assistant']
 
-    if not user_conversation or not assistant_conversation:
+    if not user_conversation:
         return jsonify({"success": False, "error": "No previous conversation to regenerate."}), 400
 
-    # Keep conversation history up to the last user message
-    last_user_message = user_conversation[-1]['content']
-    conversation_history = [{"role": "system", "content": default_system_prompt}]  # Reset history
-    conversation_history.append({"role": "user", "content": last_user_message})
+    # Get the last user message (e.g., Q2)
+    last_user_message = user_conversation[-1]
 
-    # Generate new response
-    response = asyncio.run(get_completion(conversation_history))
+    # Check if there's a corresponding assistant response to regenerate
+    if len(assistant_conversation) < len(user_conversation):
+        return jsonify({"success": False, "error": "No assistant response to regenerate for the last user message."}), 400
 
-    # Update conversation history with new response
+    # Rebuild the conversation history up to the last user message (Q2) excluding the assistant's response
+    conversation_history_to_regenerate = [{"role": "system", "content": default_system_prompt}]  # Starting prompt
+
+    # Add all messages up to the last user message (excluding the assistant's last response)
+    for msg in conversation_history:
+        if msg['role'] == 'user' and msg['content'] == last_user_message['content']:
+            # Add the last user message and stop including more assistant responses
+            conversation_history_to_regenerate.append(msg)
+            break
+        conversation_history_to_regenerate.append(msg)
+
+    # Generate new response for the last user message
+    response = asyncio.run(get_completion(conversation_history_to_regenerate))
+
+    # Update the conversation history by removing the last assistant response and adding the regenerated one
+    conversation_history = conversation_history[:-1]  # Remove the old assistant's response
     conversation_history.append({"role": "assistant", "content": response['response']})
+
+    # Save updated conversation back to the database
     chat_history.conversation = json.dumps(conversation_history)
     db.session.commit()
 
+    # Return the newly generated response
     return jsonify(response)
+
 
 #asdads
 

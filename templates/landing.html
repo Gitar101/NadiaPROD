@@ -14,28 +14,32 @@
             padding: 0;
             box-sizing: border-box;
         }
+        body {
+            font-family: 'Roboto', sans-serif;
 
-        @keyframes gradientAnimation {
-    0% {
-        background-position: 0% 50%;
-    }
-    50% {
-        background-position: 100% 50%;
-    }
-    100% {
-        background-position: 0% 50%;
-    }
-}
+            color: #FFFFFF;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
 
-body {
-    font-family: 'Roboto', sans-serif;
-    background: linear-gradient(120deg, #90e9e4, #664566, #818dcf, #9ec49e);
-    background-size: 200% 200%;
-    animation: gradientAnimation 7s ease infinite;
-    color: #FFFFFF;
-    overflow-x: hidden;
-    line-height: 1.6;
-}
+
+    /* ... your existing styles ... */
+
+
+
+        video {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: -100;
+            transform: translateX(-50%) translateY(-50%);
+            background-size: cover;
+        }
+
 
         header {
             position: fixed;
@@ -336,13 +340,14 @@ body {
         .gallery-item {
             position: relative;
             width: 700px; /* Set the width */
-            height: 400px; /* Set the height */
+            height: 350px; /* Set the height */
             overflow: hidden; /* Hide overflow */
+            color: #FFFFFF;
         }
 
         .gallery-item img {
-            width: 100%; /* Make image fill the container */
-            height: auto; /* Maintain aspect ratio */
+            width: 90%; /* Make image fill the container */
+            height: 92%; /* Maintain aspect ratio */
             max-height: 100%; /* Ensure it doesn't exceed the height */
             object-fit: cover; /* Cover the area while maintaining aspect ratio */
         }
@@ -350,6 +355,10 @@ body {
     </style>
 </head>
 <body>
+<video autoplay muted loop>
+    <source src="static/rotating_sphere.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+</video>
 <header>
     <div class="logo">Nadia</div>
     <nav>
@@ -368,11 +377,7 @@ body {
     <div class="hero-image"></div>
 </section>
 <div class="sticky-nav">
-    <ul>
-        <li><a href="#gallery"><i class="fas fa-images"></i> Gallery</a></li>
-        <li><a href="#about" onclick="toggleSection('about')"><i class="fas fa-info-circle"></i> About</a></li>
-        <li><a href="login_register"><i class="fas fa-sign-in-alt"></i> Log In</a></li>
-    </ul>
+
 </div>
 <section class="section gallery" id="gallery">
     <div class="gallery-slideshow">

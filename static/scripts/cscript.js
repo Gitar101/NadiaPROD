@@ -267,7 +267,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 // Disable the icon to prevent multiple clicks
                 regenerateIcon.style.pointerEvents = "none";
-                regenerateIcon.classList.add("fa-spin"); // Add spinning effect
+
 
                 // Get the last assistant message
                 const lastAssistantMessage = messageContainer;
