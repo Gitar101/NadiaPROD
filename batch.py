@@ -7,7 +7,6 @@ import os
 import uuid
 import re
 import time
-
 import groq
 import httpx
 import requests
@@ -160,8 +159,8 @@ def favicon():
     return send_from_directory(app.static_folder, 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 
-@app.route('/chat1', methods=['POST'])
-def chat1():
+@app.route('/fetch_response', methods=['POST'])
+def fetch():
     if 'username' not in session:
         return jsonify({"success": False, "error": "User not logged in"}), 401
 

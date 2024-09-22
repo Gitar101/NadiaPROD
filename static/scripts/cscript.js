@@ -197,7 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             // Send the user's message to the server
-            const chatResponse = await fetch("/chat1", {
+            const chatResponse = await fetch("/fetch_response", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
