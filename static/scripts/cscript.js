@@ -243,7 +243,16 @@ document.addEventListener("DOMContentLoaded", () => {
         messageElement.appendChild(senderElement);
 
         const textElement = document.createElement("span");
-        textElement.innerHTML = message;
+
+        // Check if the message contains a code block like ```[code]```
+        const codeBlockRegex = /```([\s\S]*?)```/g;
+        let formattedMessage = message.replace(codeBlockRegex, (match, p1) => {
+            // Wrap the detected code block content inside <div class="code-container"><code>...</code></div>
+            return `<div class="code-container"><code>${p1.trim().replace(/\n/g, "<br>")}</code></div>`;
+        });
+
+        // Update the message content with formatted code blocks
+        textElement.innerHTML = formattedMessage;
 
         messageElement.appendChild(textElement);
         messageContainer.appendChild(messageElement);
@@ -268,7 +277,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 // Disable the icon to prevent multiple clicks
                 regenerateIcon.style.pointerEvents = "none";
 
-
                 // Get the last assistant message
                 const lastAssistantMessage = messageContainer;
 
@@ -287,7 +295,14 @@ document.addEventListener("DOMContentLoaded", () => {
                     const data = await regenerateResponse.json();
 
                     // Replace the old response with the new one
-                    lastAssistantMessage.querySelector("span").innerHTML = data.response.replace(/\n/g, "<br>");
+                    let newMessage = data.response;
+
+                    // Apply the same formatting logic for code blocks
+                    newMessage = newMessage.replace(codeBlockRegex, (match, p1) => {
+                        return `<div class="code-container"><code>${p1.trim().replace(/\n/g, "<br>")}</code></div>`;
+                    });
+
+                    lastAssistantMessage.querySelector("span").innerHTML = newMessage;
 
                     // Update the regeneration count
                     currentCount++;
@@ -318,6 +333,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         chat.scrollTop = chat.scrollHeight;
     }
+
+
+
+
+
+
 
 
     function updateStreamedMessage(newToken) {
