@@ -214,7 +214,7 @@ async def get_completion(conversation_history, websocket=None):
         try:
             # Use streaming option if available
             completion = await client.chat.completions.create(
-                model="llama3-70b-8192",
+                model="llama-3.1-70b-versatile",
                 messages=conversation_history,
                 temperature=0.5,
                 max_tokens=2500,

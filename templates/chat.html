@@ -36,7 +36,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-<body>
+<body data-chat-id="{{ request.args.get('chat_id', '') }}">
 
     <div id="settings-button">
         <button id="modern-open-settings"><i class="fas fa-bars"></i></button>
