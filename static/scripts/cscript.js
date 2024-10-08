@@ -1,3 +1,33 @@
+let lastX = 0;
+let lastY = 0;
+
+document.addEventListener('mousemove', function(e) {
+    const currentX = e.clientX;
+    const currentY = e.clientY;
+
+    const trail = document.createElement('div');
+    trail.className = 'trail';
+
+    const deltaX = currentX - lastX;
+    const deltaY = currentY - lastY;
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    const angle = Math.atan2(deltaY, deltaX) * 180 / Math.PI;
+
+    trail.style.left = lastX + 'px';
+    trail.style.top = lastY + 'px';
+    trail.style.width = distance + 'px';
+    trail.style.transform = `rotate(${angle}deg)`;
+    trail.style.transformOrigin = '0 50%';
+
+    document.body.appendChild(trail);
+
+    setTimeout(() => {
+        document.body.removeChild(trail);
+    }, 500);
+
+    lastX = currentX;
+    lastY = currentY;
+});
 document.addEventListener("DOMContentLoaded", () => {
     const messageForm = document.getElementById("user-input");
     const messageInput = document.getElementById("message");
@@ -38,22 +68,24 @@ document.addEventListener("DOMContentLoaded", () => {
 		customPromptInput.disabled = selectedPreset !== "custom";
 		customPromptInput.value = ""
 	}
-	themeDropdown.addEventListener("change", () =>
-	{
-		const selectedTheme = themeDropdown.value;
-		if (selectedTheme === "cli")
-		{
-			document.querySelector('link[href="static/styles_url/global.css"]').href = "static/styles_url/cli.css";
-			settingsModernButton.style.display = "none";
-			settingsCliButton.style.display = "block"
-		}
-		else
-		{
-			document.querySelector('link[href="static/styles_url/cli.css"]').href = "static/styles_url/global.css";
-			settingsModernButton.style.display = "block";
-			settingsCliButton.style.display = "none"
-		}
-	});
+	themeDropdown.addEventListener("change", () => {
+        const selectedTheme = themeDropdown.value;
+        const themeLink = document.querySelector('link[href*="styles_url/"]');  // Ensure the correct link is targeted
+        if (themeLink) {
+            if (selectedTheme === "cli") {
+                themeLink.href = "static/styles_url/cli.css";
+                settingsModernButton.style.display = "none";
+                settingsCliButton.style.display = "block";
+            } else {
+                themeLink.href = "static/styles_url/global.css";
+                settingsModernButton.style.display = "block";
+                settingsCliButton.style.display = "none";
+            }
+        } else {
+            console.error("Theme link element not found");
+        }
+    });
+
 
 	presetDropdown.addEventListener("change", updateInputState);
 	resetPromptButton.addEventListener("click", async () =>

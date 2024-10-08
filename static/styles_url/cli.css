@@ -1,46 +1,413 @@
-body {
-    background-color: #1a1a1a;
-    color: #b3b3b3;
-    font-family: 'Courier New', Courier, monospace;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+/* Base styles */
+html, body {
+    height: 100%;
     margin: 0;
-    font-size: 1.15em;
-    overflow-x: hidden; /* Disable horizontal scrolling */
+    padding: 0;
+    background-color: #000000;
+    color: #8A2BE2;
+    font-family: 'VT323', monospace;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+}
+
+/* Chat container */
+#chat-container {
+    width: 90%;
+    max-width: 1200px;
+    background-color: #0A0A0A;
+    padding: 20px;
+    position: relative;
+    height: calc(100vh - 40px);
+    overflow: hidden;
+    overflow-y: auto;
+    border: 1px solid #8A2BE2;
+    border-radius: 5px;
+    margin: 20px auto;
+    scrollbar-width: thin;
+    scrollbar-color: #8A2BE2 #0A0A0A;
+}
+
+#chat-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+#chat-container::-webkit-scrollbar-track {
+    background: #0A0A0A;
+}
+
+#chat-container::-webkit-scrollbar-thumb {
+    background-color: #8A2BE2;
+    border-radius: 4px;
+}
+
+/* Chat messages */
+.chatbox {
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.chat img {
+    max-width: 20%;
+    height: auto;
+    display: block;
+    border: 1px solid #8A2BE2;
+}
+
+#chat {
+    flex: 1;
+    overflow-y: scroll;
+    padding: 20px;
+    white-space: pre-wrap;
+    box-sizing: border-box;
+    scroll-behavior: smooth;
+}
+
+/* User input area */
+#user-input {
+    display: flex;
+    align-items: center;
+    background-color: #0A0A0A;
+    border: 1px solid #8A2BE2;
+    border-radius: 5px;
+    padding: 10px;
+    max-width: 500px;
+    width: 100%;
+    margin: 20px auto;
+    box-shadow: 0 0 10px rgba(138, 43, 226, 0.2);
+}
+
+#message {
+    flex: 1;
+    padding: 10px;
+    background-color: transparent;
+    color: #8A2BE2;
+    border: none;
+    outline: none;
+    font-family: 'VT323', monospace;
+    font-size: 18px;
+}
+
+#send {
+    padding: 10px 20px;
+    border: none;
+    background-color: #8A2BE2;
+    color: #000000;
+    cursor: pointer;
+    font-family: 'VT323', monospace;
+    font-size: 18px;
+    border-radius: 5px;
+}
+
+#send:hover {
+    background-color: #9A4AE2;
+}
+
+/* Message styling */
+.username {
+    font-size: 20px;
+    font-weight: bold;
+    padding: 2px 6px;
+    margin-bottom: 3px;
+    border-radius: 3px;
+    background: #4B0082;
+    display: inline-block;
+}
+
+.user-container, .assistant-container {
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.user-container {
+    align-items: flex-end;
+}
+
+.assistant-container {
+    align-items: flex-start;
+}
+
+.message {
+    font-size: 18px;
+    padding: 5px 10px;
+    word-wrap: break-word;
+    margin-bottom: 5px;
+    display: inline-block;
+    border-radius: 5px;
+    background: #1A1A1A;
+    color: #8A2BE2;
+    max-width: 70%;
+    position: relative;
+}
+
+.message img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+    border: 1px solid #8A2BE2;
 }
 
 
 
-#settings-button button {
-    padding: 10px 20px;
-    border: none;
-    background-color: #1a1a1a;
-    color: #b3b3b3;
+@keyframes scan {
+    0% {
+        background-position: 0 -100vh;
+    }
+    35%, 100% {
+        background-position: 0 100vh;
+    }
+}
+
+.message {
+    animation: glitch 0.3s infinite;
+    position: relative;
+    overflow: hidden;
+}
+
+.message::before {
+    content: attr(data-text);
+    position: absolute;
+    left: -2px;
+    text-shadow: 2px 0 #ff00c1;
+    top: 0;
+    color: #8A2BE2;
+    overflow: hidden;
+    clip: rect(0, 900px, 0, 0);
+    animation: glitch-effect 3s infinite linear alternate-reverse;
+}
+
+.message::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 2px;
+    text-shadow: -2px 0 #00fff9;
+    top: 0;
+    color: #8A2BE2;
+    overflow: hidden;
+    clip: rect(0, 900px, 0, 0);
+    animation: glitch-effect 2s infinite linear alternate-reverse;
+}
+
+
+
+/* CRT screen effect */
+body::before {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    z-index: 2;
+    background-size: 100% 2px, 3px 100%;
+    pointer-events: none;
+}
+
+
+
+@keyframes flicker {
+    0% {
+        opacity: 0.27861;
+    }
+    5% {
+        opacity: 0.34769;
+    }
+    10% {
+        opacity: 0.23604;
+    }
+    15% {
+        opacity: 0.90626;
+    }
+    20% {
+        opacity: 0.18128;
+    }
+    25% {
+        opacity: 0.83891;
+    }
+    30% {
+        opacity: 0.65583;
+    }
+    35% {
+        opacity: 0.67807;
+    }
+    40% {
+        opacity: 0.26559;
+    }
+    45% {
+        opacity: 0.84693;
+    }
+    50% {
+        opacity: 0.96019;
+    }
+    55% {
+        opacity: 0.08594;
+    }
+    60% {
+        opacity: 0.20313;
+    }
+    65% {
+        opacity: 0.71988;
+    }
+    70% {
+        opacity: 0.53455;
+    }
+    75% {
+        opacity: 0.37288;
+    }
+    80% {
+        opacity: 0.71428;
+    }
+    85% {
+        opacity: 0.70419;
+    }
+    90% {
+        opacity: 0.7003;
+    }
+    95% {
+        opacity: 0.36108;
+    }
+    100% {
+        opacity: 0.24387;
+    }
+}
+
+/* Existing styles for copy button, code blocks, ASCII art, popups, settings buttons, and regenerate icon remain unchanged */
+.copy-button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    padding: 5px 10px;
+    border: 1px solid #333;
+    background-color: #FFE6E6;
+    color: #333;
     cursor: pointer;
     text-decoration: underline;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: 'Arial', sans-serif;
+    border-radius: 5px;
+    z-index: 10; /* Ensure the button is clickable */
+    display: none; /* Initially hidden */
+}
+/* code for copy code */
+.code-container {
+    background-color: #2d2e2d;
+    border: 1px solid #e1e1e1;
+    border-radius: 15px;
+    font-family: 'Rajdhani', sans-serif;
+    margin: 10px 0;
+    padding: 10px;
+    position: relative;
+}
+
+.code-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #ececec;
+    border-bottom: 1px solid #ddd;
+    padding: 8px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    border-radius: 5px 5px 0 0;
+}
+
+.code-language {
+    font-size: 14px;
+    color: #333;
+}
+
+.copy-code-button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background-color 0.3s;
+}
+.trail {
+    position: fixed;
+    height: 2px;
+    width: 2px;
+    border-radius: 1px;
+    background-color: #8A2BE2;
+    pointer-events: none;
+    opacity: 0.7;
+    transition: width 0.1s ease, opacity 0.3s ease;
+    z-index: 9999;
+}
+
+/* Keyframe animation for the trail */
+@keyframes fadeOut {
+    0% { opacity: 0.7; }
+    100% { opacity: 0; }
+}
+
+/* Apply the animation to the trail */
+.trail {
+    animation: fadeOut 0.5s linear forwards;
+}
+
+.copy-code-button:hover {
+    background-color: #0056b3;
+}
+#modern-open-settings {
+    display: block;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 1em;
+    color: #b8b3a7;
+    background-color: #c7d6d6;
+    background-size: 400% 400%;
+    cursor: pointer;
+    text-decoration: none;
+    font-family: 'Arial', sans-serif;
+    font-size: 1.15em;
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+}
+
+#modern-open-settings:hover {
+    color: #E1AFD1;
+    text-decoration: none;
+}
+
+#cli-open-settings {
+    display: none;
+    padding: 10px 20px;
+    border: none;
+    background-color: transparent;
+    color: #7469B6;
+    cursor: pointer;
+    text-decoration: underline;
+    font-family: 'Arial', sans-serif;
     font-size: 1.15em;
     position: fixed;
     bottom: 10px;
     left: 10px;
     z-index: 1000;
 }
-#settings-button button:hover {
-    color: rgb(119, 72, 119);
+
+#cli-open-settings:hover {
+    color: #E1AFD1;
     text-decoration: none;
 }
 
 .draggable {
     position: fixed;
-    background-color: #1a1a1a;
-    color: #b3b3b3;
+    background-color: #c7d6d6;
+    color: #333;
     padding: 20px;
-    border: 2px solid purple;
+    border: 2px solid #7469B6;
     z-index: 999;
     font-size: 1.25em;
     cursor: move;
+    border-radius: 10px;
 }
 
 .draggable-header {
@@ -53,7 +420,7 @@ body {
 .close-button {
     cursor: pointer;
     font-size: 1.5em;
-    color: #b3b3b3;
+    color: #333;
 }
 
 .close-button:hover {
@@ -68,18 +435,21 @@ body {
     text-align: center;
 }
 
-#custom-prompt {
+
+
+#settings-popup {
     display: none;
-    position: fixed;
+    position: center;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: #1a1a1a;
-    color: #b3b3b3;
+    background-color: #c7d6d6;
+    color: #333;
     padding: 20px;
-    border: 2px solid purple;
+    border: 2px solid #c7d6d6;
     z-index: 999;
     font-size: 1.25em;
+    border-radius: 10px;
 }
 
 #custom-prompt-content {
@@ -91,193 +461,52 @@ body {
     max-width: 100%;
     min-width: 100%;
     margin-bottom: 10px;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: 'Arial', sans-serif;
     font-size: 1em;
     resize: vertical;
+    border-radius: 10px;
 }
 
 #submit-prompt,
 #reset-prompt {
     padding: 10px 20px;
     border: none;
-    background-color: #1a1a1a;
-    color: #b3b3b3;
+    background-color: #afb8ae;
+    color: #7469B6;
     cursor: pointer;
     text-decoration: underline;
     box-sizing: border-box;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: 'Rajdhani', sans-serif;
     margin-right: 10px;
+    border-radius: 10px;
 }
 
 #reset-prompt {
     background-color: #b30000;
+    color: #FFE6E6;
 }
-
-#chat-container {
-    width: 90%;
-    max-width: 1000px;
-    background-color: #1a1a1a;
-    padding: 20px;
-    position: relative;
-    box-sizing: border-box;
-    height: calc(100vh - 40px);
-    overflow: hidden;
-    border: 2px dashed purple;
-    overflow-y: auto; /* Enable vertical scrolling */
-}
-
-.chatbox {
-    max-width: 100%;
-    overflow: hidden;
-}
-
-.chatbox img {
-    max-width: 100%;
-    height: auto;
-    display: block;
-    margin-bottom: 10px;
-}
-
-#chat {
-    height: calc(100% - 80px);
-    overflow-y: scroll;
-    padding: 20px;
-    margin-bottom: 10px;
-    white-space: pre-wrap;
-    border: solid grey;
-    border-width: 1px 0;
-    box-sizing: border-box;
-    scroll-behavior: smooth;
-}
-
-#user-input {
-    display: flex;
-    align-items: center;
-}
-
-#message {
-    flex: 1;
-    padding: 10px;
-    background-color: #1a1a1a;
-    color: #b3b3b3;
-    border: none;
-    border-bottom: 1px solid pink;
-    box-sizing: border-box;
-    font-family: 'Courier New', Courier, monospace;
-    resize: none;
-    font-size: 1.15em;
-}
-
-#send {
-    padding: 10px 20px;
-    border: none;
-    background-color: #1a1a1a;
-    color: #b3b3b3;
-    cursor: pointer;
-    text-decoration: underline;
-    box-sizing: border-box;
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 1.15em;
-}
-
-.message {
-    margin-bottom: 10px;
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 1.15em;
-    position: relative;
-}
-
-.copy-button {
-    position: absolute;
-    top: 0;
-    right: 0;
-    padding: 5px 10px;
-    border: none;
-    background-color: #1a1a1a;
-    color: #b3b3b3;
-    cursor: pointer;
-    text-decoration: underline;
-    font-family: 'Courier New', Courier, monospace;
-}
-
-.user {
-    text-align: right;
-    color: #b3b3b3;
-}
-
-.assistant {
-    text-align: left;
-    color: purple;
-}
-
-.ascii-art {
-    text-align: center;
-    color: purple;
-    margin-bottom: 10px;
-    overflow-wrap: break-word;
-    white-space: pre-wrap;
-    font-size: 1.25em; /* Adjust this value as needed */
-}
-
-#chat::-webkit-scrollbar {
-    width: 12px;
-}
-
-#chat::-webkit-scrollbar-track {
-    background: #1a1a1a;
-}
-
-#chat::-webkit-scrollbar-thumb {
-    background-color: #404040;
-    border: 2px solid #1a1a1a;
-}
-
-#chat::-webkit-scrollbar-thumb:hover {
-    background-color: #6b6b6b;
-}
-
-#popup {
-    display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: #1a1a1a;
-    color: #b3b3b3;
-    padding: 20px;
-    border: 2px solid purple;
-    z-index: 999;
-    font-size: 1.25em;
-}
-
-#popup-content {
-    text-align: center;
-}
-
-#close-popup {
-    padding: 10px 20px;
-    border: none;
-    background-color: #1a1a1a;
-    color: #b3b3b3;
-    cursor: pointer;
-    text-decoration: underline;
-    box-sizing: border-box;
-    font-family: 'Courier New', Courier, monospace;
-}
-
+/* Media queries for responsiveness */
 @media (max-width: 768px) {
+    #logo {
+        width: 80%; /* Adjust this value as needed */
+        height: 80%;
+    }
+    .message img {
+        max-width: 50%;
+        height: 50%;
+      }
     body {
-        font-size: 1em;
+        font-size: 0.8em;
     }
 
     #chat-container {
-        width: 95%;
+        width: 100%;
         padding: 10px;
     }
 
     #message {
         padding: 5px;
-        font-size: 1em;
+        font-size: 0.9em;
     }
 
     #send {
@@ -293,14 +522,16 @@ body {
     #popup {
         font-size: 1em;
     }
-
-    .ascii-art {
-        font-size: 0.50em; /* Adjusted to fit smaller screens */
-    }
-
-    .draggable {
-        width: 80%;
-        left: 10%;
-        top: 10%;
-    }
 }
+
+
+/* Animations */
+@keyframes fadeInOut {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+}
+
+#cooldown-popup {
+    animation: fadeInOut 1.5s ease-out;
+}
+
